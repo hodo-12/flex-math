@@ -18,7 +18,9 @@ jobs:
           node --check state.js
           node --check learning.js
       - name: Verify mission behavior
-        run: npm test
+        run: |
+          npm test
+          node --test character-rig.test.js
       - name: Install browser test driver
         run: npm install --no-save --no-package-lock playwright-core@1.56.0
       - name: Start local game server
@@ -31,7 +33,7 @@ jobs:
       - name: Test game in Chrome
         run: node browser-smoke.mjs
       - name: Capture character preview (development branch only)
-        if: github.ref == 'refs/heads/feature/realistic-character-rig-no-deploy'
+        if: github.ref == 'refs/heads/feature/realistic-character-rig-no-deploy' || github.head_ref == 'feature/realistic-character-rig-no-deploy'
         run: node character-preview.mjs
       - name: Keep screenshots for inspection
         if: always()
@@ -42,6 +44,7 @@ jobs:
             level3-ocean.png
             level3-complete.png
             level3-guide.png
+            character-previews/
             avatar-hood-idle.png
             avatar-cat-walk.png
             avatar-cap-idle.png

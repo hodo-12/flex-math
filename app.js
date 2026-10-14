@@ -4,6 +4,7 @@ import {objects,Mission,levels} from './state.js';
 import {setupLearning,unlockDiscovery} from './learning.js';
 const $=s=>document.querySelector(s),all=s=>[...document.querySelectorAll(s)];
 let choice='hood',currentLevel=1,roomContent=[],forestGroup=null,oceanGroup=null,oceanBubbles=[],seaFish=[],celebrating=0,mission=new Mission(),running=false,selected=null,walking=null,walkTime=0,inspectModel=null,feedbackPending=false,completed=false;
+let walkSpeed=0;
 let renderer,scene,camera,avatar,face,characterRig=null,objectMeshes=new Map(),angle=.65,elevation=.84,zoom=12,viewRenderer,viewScene,viewCamera;
 const clock=new T.Clock(),ray=new T.Raycaster(),pointer=new T.Vector2();
 const mat=(color)=>new T.MeshStandardMaterial({color,roughness:.72});
@@ -109,7 +110,7 @@ if(res.collected){const newCard=unlockDiscovery(currentLevel,selected.id);for(le
 function updateProgress(){$('#progressFill').style.width=(mission.found.size/3*100)+'%';$('#count').textContent=mission.found.size+' / 3';const found=[...mission.found];all('.slots span').forEach((s,i)=>{s.textContent=found[i]?activeObjects().find(o=>o.id===found[i]).symbol:'?';s.classList.toggle('found',!!found[i]);s.title=found[i]?activeObjects().find(o=>o.id===found[i]).name:'아직 발견하지 않은 물건';});all('#objectList button').forEach(b=>{const done=mission.found.has(b.dataset.id);b.classList.toggle('done',done);b.disabled=done;const item=activeObjects().find(o=>o.id===b.dataset.id);b.innerHTML='<span class=object-symbol>'+item.symbol+'</span><span>'+item.name+'</span><i>'+(done?'✓':'↗')+'</i>';});}
 function closeInspect(){$('#inspect').close();if(mission.found.size===3){completed=true;$('#resultStats').textContent='세 가지 발견 완료 · 총 '+mission.attempts+'번 관찰했어요';$('#complete').querySelector('.eyebrow').textContent='LEVEL 0'+currentLevel+' COMPLETE';$('#complete').querySelector('h2').textContent='성공했다!! 🎉';try{localStorage.setItem('topology-level'+currentLevel,'complete');}catch{}if(currentLevel===1)$('#levelStatus').textContent='클리어 ✓';if(currentLevel===2)$('#level2Status').textContent='클리어 ✓';if(currentLevel===3)$('#level3Status').textContent='클리어 ✓';celebrating=3;$('#celebrationOverlay').hidden=false;avatar.position.set(0,.02,1);victoryTimer=setTimeout(()=>{if(!running||!completed)return;$('#celebrationOverlay').hidden=true;$('#complete').showModal();$('#complete').classList.add('victory');setTimeout(()=>$('#complete').classList.remove('victory'),3500);},3000);}}
 $('#yes').onclick=()=>answer(true);$('#no').onclick=()=>answer(false);$('#continue').onclick=closeInspect;$('#closeInspect').onclick=closeInspect;$('#inspect').addEventListener('cancel',e=>{e.preventDefault();closeInspect();});
-function start(){clearTimeout(victoryTimer);document.body.classList.add('playing');document.body.dataset.level=currentLevel;$('#playerFace').src=characterInfo[choice].file;$('#playerName').textContent=characterInfo[choice].name;$('#celebrationOverlay').hidden=true;celebrating=0;try{if(!renderer)init();}catch(e){document.body.classList.remove('playing');$('#error').hidden=false;$('#error').textContent='3D 화면을 시작하지 못했어요. WebGL을 지원하는 최신 브라우저에서 다시 열어 주세요.';console.error(e);return;}mission=new Mission(currentLevel);switchLevelWorld();running=true;completed=false;walking=null;selected=null;characterRig.reset();characterRig.setCharacter(choice,textures[choice]);avatar.position.set(-1.1,.02,2.4);for(const g of objectMeshes.values())g.visible=true;$('#lobby').hidden=true;$('#footer').hidden=true;$('#game').hidden=false;$('#objectList').replaceChildren();activeObjects().forEach(o=>{const b=document.createElement('button');b.textContent=o.name;b.dataset.id=o.id;b.onclick=()=>choose(o.id);$('#objectList').append(b);});updateProgress();resetView();resize();speak('물건을 눌러 함께 살펴봐요!');$('#start').blur();}
+function start(){clearTimeout(victoryTimer);document.body.classList.add('playing');document.body.dataset.level=currentLevel;$('#playerFace').src=characterInfo[choice].file;$('#playerName').textContent=characterInfo[choice].name;$('#celebrationOverlay').hidden=true;celebrating=0;try{if(!renderer)init();}catch(e){document.body.classList.remove('playing');$('#error').hidden=false;$('#error').textContent='3D 화면을 시작하지 못했어요. WebGL을 지원하는 최신 브라우저에서 다시 열어 주세요.';console.error(e);return;}mission=new Mission(currentLevel);switchLevelWorld();running=true;completed=false;walking=null;selected=null;walkSpeed=0;characterRig.setCharacter(choice,textures[choice]);characterRig.reset();avatar.position.set(-1.1,.02,2.4);for(const g of objectMeshes.values())g.visible=true;$('#lobby').hidden=true;$('#footer').hidden=true;$('#game').hidden=false;$('#objectList').replaceChildren();activeObjects().forEach(o=>{const b=document.createElement('button');b.textContent=o.name;b.dataset.id=o.id;b.onclick=()=>choose(o.id);$('#objectList').append(b);});updateProgress();resetView();resize();speak('물건을 눌러 함께 살펴봐요!');$('#start').blur();}
 function resetView(){angle=currentLevel===2?.18:.65;elevation=.8;zoom=innerWidth<800?17:14;}
 $('#zoomIn').onclick=()=>zoom=T.MathUtils.clamp(zoom-1,8,20);$('#zoomOut').onclick=()=>zoom=T.MathUtils.clamp(zoom+1,8,20);
 $('#start').onclick=start;setupLearning();$('#level').onclick=()=>{currentLevel=1;updateLevelSelection();};$('#level2').onclick=()=>{currentLevel=2;updateLevelSelection();};$('#level3').onclick=()=>{currentLevel=3;updateLevelSelection();};$('#resetView').onclick=resetView;$('#hint').onclick=()=>speak(levels[currentLevel].hint);function home(){clearTimeout(victoryTimer);document.body.classList.remove('playing');$('#celebrationOverlay').hidden=true;celebrating=0;$('#complete').close();$('#inspect').close();running=false;walking=null;$('#game').hidden=true;$('#lobby').hidden=false;$('#footer').hidden=false;$('#start').focus();}$('#exit').onclick=home;$('#home').onclick=home;$('#replay').onclick=()=>{$('#complete').close();start();};$('#complete').addEventListener('cancel',e=>{e.preventDefault();home();});
@@ -128,10 +129,15 @@ function animate(){
       avatar.position.x=walking.x;
       avatar.position.z=walking.z;
       walking=null;
+      walkSpeed=0;
       openInspect();
     }else{
       moveAngle=Math.atan2(delta.x,delta.z);
-      avatar.position.addScaledVector(delta.normalize(),Math.min(distance,dt*2.8));
+      // Accelerate and brake the existing click-to-walk motion; gait reads actual
+      // travelled distance, so animation stays in sync at any frame rate.
+      const desiredSpeed=Math.min(1.65,Math.sqrt(2*4.5*distance));
+      walkSpeed+=T.MathUtils.clamp(desiredSpeed-walkSpeed,-dt*4.5,dt*4.5);
+      avatar.position.addScaledVector(delta.normalize(),Math.min(distance,dt*walkSpeed));
       isMoving=true;
     }
   }
