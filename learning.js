@@ -35,6 +35,11 @@ function readJSON(key,fallback){try{const v=JSON.parse(localStorage.getItem(key)
 const favorites=new Set(readJSON('flex-math-favorites',[]));
 const seen=new Set(readJSON('flex-math-cards',[]));
 const badges=new Set(readJSON('flex-math-badges',[]));
+const discoveries=new Set(readJSON('flex-math-discoveries',[]));
+const discoveryLabels={
+ '1:square':'사각 고리 · 모서리와 종수 1','1:oval':'길쭉한 고리 · 크기와 위상','1:cup':'손잡이 컵 · 컵과 도넛',
+ '2:fruit':'숲 열매 · 매끈한 구면','2:stone':'마법 돌 · 찌그러진 구면','2:egg':'수정 알 · 긴 구면'
+};
 let tab='concepts',activeQuiz='explorer',quizIndex=0,score=0,answered=false,flipped=new Set();
 const $=s=>document.querySelector(s);
 function persist(key,set){try{localStorage.setItem(key,JSON.stringify([...set]));}catch{}}
@@ -42,6 +47,10 @@ function el(tag,text,cls){const e=document.createElement(tag);if(text!==undefine
 function renderConcepts(out){
  const title=el('h3','수학자가 보는 것은 겉모양이 아니라 구조');out.append(title);
  const p=el('p','위상동형은 양방향으로 연속적인 대응이 가능한 공간 사이의 관계예요. 자르거나 붙이지 않고 부드럽게 바꿔 보는 것은 이를 이해하는 좋은 직관입니다.');out.append(p);
+ const unlocked=el('article',undefined,'concept-item');
+ unlocked.append(el('h4','📖 탐험하며 획득한 위상 카드 ('+discoveries.size+'/6)'));
+ unlocked.append(el('p',discoveries.size?[...discoveries].map(k=>'✓ '+(discoveryLabels[k]||k)).join(' · '):'레벨에서 정답 물체를 발견하면 여기에 개념 카드가 수집돼요.'));
+ out.append(unlocked);
  const concepts=[
  ['① 1차원 곡선 · 원','끝점이 없고, 갈림점도 없고, 하나로 이어진 닫힌 선입니다. 열린 선·원판·서로 떨어진 두 원은 원과 달라요.'],
  ['② 2차원 표면 · 구면','두께 있는 공의 겉표면을 생각합니다. 정육면체의 경계, 매끈한 열매와 돌의 전체 경계도 구면과 같은 구조일 수 있어요.'],
@@ -109,3 +118,5 @@ export function setupLearning(){
  for(const b of document.querySelectorAll('[data-learn-tab]'))b.onclick=()=>{tab=b.dataset.learnTab;render();};
  render();
 }
+
+export function unlockDiscovery(level,id){const k=level+':'+id;if(!discoveryLabels[k]||discoveries.has(k))return false;discoveries.add(k);persist('flex-math-discoveries',discoveries);return true;}
