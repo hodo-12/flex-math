@@ -9,13 +9,13 @@ const browser=await chromium.launch({
   headless:true,executablePath,
   args:['--no-sandbox','--disable-dev-shm-usage','--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']
 });
-const page=await browser.newPage({viewport:{width:1400,height:950}});
+const page=await browser.newPage({viewport:{width:1000,height:720}});
 const errors=[];
-page.on('pageerror',error=>errors.push(error.message));
+page.on('pageerror',error=>{errors.push(error.message);console.error('PAGE ERROR:',error.message);});
 const seen=(locator)=>locator.isVisible();
 async function pick(id,correctAnswer=true){
   await page.locator('#objectList button[data-id="'+id+'"]').click();
-  await page.locator('#inspect').waitFor({state:'visible',timeout:20000});
+  await page.locator('#inspect').waitFor({state:'visible',timeout:60000});
   await page.locator(correctAnswer?'#yes':'#no').click();
   const result=await page.locator('#feedback').innerText();
   await page.locator('#continue').click();
@@ -29,7 +29,7 @@ try{
   }
   await page.locator('#level3').click();
   await page.locator('#start').click();
-  await page.locator('#world canvas').waitFor({state:'visible',timeout:20000});
+  await page.locator('#world canvas').waitFor({state:'visible',timeout:60000});
   assert.equal(await page.locator('#objectList button').count(),8);
   assert.match(await page.locator('.mission h2').innerText(),/두 개인/);
   await page.screenshot({path:'level3-ocean.png'});

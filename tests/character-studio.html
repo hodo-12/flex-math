@@ -1,0 +1,17 @@
+<!doctype html><meta charset="utf-8"><title>FLEX MATH — Character QA (development only)</title>
+<style>body{margin:0;background:#e9eddf;font:16px system-ui;color:#253d39}canvas{display:block}header{position:absolute;top:24px;left:32px}h1{font-size:24px;margin:0 0 8px}p{font-size:13px;margin:0}</style>
+<header><h1>FLEX MATH · Character study</h1><p id="label">Original photographs · articulated clothing · development branch only</p></header>
+<script type="module">
+import * as T from '../three.module.js';import {createCharacterRig} from '../character-rig.js';
+const renderer=new T.WebGLRenderer({antialias:true});renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(1);renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1;document.body.append(renderer.domElement);
+const scene=new T.Scene();scene.background=new T.Color(0xe9eddf);scene.add(new T.HemisphereLight(0xfff6e5,0x64746f,2.1));
+const key=new T.DirectionalLight(0xffecd6,2.6);key.position.set(-3,7,5);key.castShadow=true;key.shadow.mapSize.set(2048,2048);scene.add(key);
+const fill=new T.DirectionalLight(0xc8e3ff,1.2);fill.position.set(4,4,-3);scene.add(fill);
+const ground=new T.Mesh(new T.PlaneGeometry(80,80),new T.MeshStandardMaterial({color:0xe9eddf,roughness:1}));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+const camera=new T.PerspectiveCamera(32,innerWidth/innerHeight,.1,100);camera.position.set(0,3.4,9.6);camera.lookAt(0,1.1,0);
+const files={hood:'hood.png',smile:'smile.png',cat:'avatar-cat-head.png',cap:'avatar-cap-head.png'};
+const rigs=await Promise.all(Object.entries(files).map(async([id,file],i)=>{const tx=await new T.TextureLoader().loadAsync('../'+file);tx.colorSpace=T.SRGBColorSpace;const rig=createCharacterRig(T,scene);rig.setCharacter(id,tx);rig.reset();rig.root.position.x=(i-1.5)*1.45;return rig;}));
+let time=0;
+window.studio={rigs,scene,camera,renderer,step({moving=false,angle=0,celebrating=false,frames=1,orbit=0}={}){for(let i=0;i<frames;i++){time+=1/60;for(const r of rigs){if(moving){r.root.position.x+=Math.sin(angle)*1.4/60;r.root.position.z+=Math.cos(angle)*1.4/60;}r.tick({dt:1/60,time,moving,targetAngle:angle,cameraPosition:camera.position,celebrating});}}const centre=new T.Vector3();rigs.forEach(r=>centre.add(r.root.position));centre.multiplyScalar(.25);camera.position.set(centre.x+Math.sin(orbit)*9.6,3.4,centre.z+Math.cos(orbit)*9.6);camera.lookAt(centre.x,1.1,centre.z);renderer.render(scene,camera);},reset(){rigs.forEach((r,i)=>{r.reset();r.root.position.set((i-1.5)*1.45,.02,0);});}};
+window.studio.step({frames:60});window.studioReady=true;
+</script>
