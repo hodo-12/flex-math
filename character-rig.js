@@ -43,14 +43,14 @@ export function createCharacterRig(T, scene) {
   const zipper=box(coat,.022,.42,.015,metal,.015,.05,.314);
   const collar=add(coat,new T.TorusGeometry(.205,.045,9,32,Math.PI),inner,[0,.44,.105]);
   collar.rotation.z=Math.PI;
-  const pocketL=box(coat,.16,.16,.037,seams,-.145,-.13,.25);
-  const pocketR=box(coat,.16,.16,.037,seams,.145,-.13,.25);
+  const pocketL=box(coat,.16,.16,.037,cloth,-.145,-.13,.25);
+  const pocketR=box(coat,.16,.16,.037,cloth,.145,-.13,.25);
   const upperTrim=box(coat,.42,.027,.028,seams,0,.34,.225);
-  const hood=add(coat,new T.TorusGeometry(.32,.105,12,36),cloth,[0,.53,-.16]);
+  const hood=add(coat,new T.TorusGeometry(.31,.075,12,36),cloth,[0,.53,-.22]);
   const backpack=box(coat,.52,.54,.20,rubber,0,.0,-.30);
   backpack.geometry.translate(0,0,-.02);
-  const strapL=box(coat,.085,.58,.042,seams,-.24,.0,.17);
-  const strapR=box(coat,.085,.58,.042,seams,.24,.0,.17);
+  const strapL=box(coat,.052,.54,.034,rubber,-.24,.0,.17);
+  const strapR=box(coat,.052,.54,.034,rubber,.24,.0,.17);
 
   const arms=[];
   for(const side of [-1,1]){
@@ -71,21 +71,22 @@ export function createCharacterRig(T, scene) {
     const kneecap=orb(knee,.12,trousers,0,0,.02);
     const shin=add(knee,new T.CapsuleGeometry(.114,.17,6,10),trousers,[0,-.18,0]);
     const foot=new T.Group();foot.position.y=-.36;knee.add(foot);
-    const shoe=box(foot,.267,.145,.40,shoes,0,.07,.105);
-    const sole=box(foot,.283,.049,.42,rubber,0,.008,.107);
-    const toe=box(foot,.23,.024,.13,seams,0,.13,.25);
+    const shoe=orb(foot,.20,shoes,0,.10,.11);shoe.scale.set(.73,.48,1.12);
+    const sole=box(foot,.275,.043,.39,rubber,0,.012,.109);
+    const toe=box(foot,.19,.021,.085,seams,0,.18,.22);
     legs.push({side,hip,knee,foot});
   }
 
   // The whole head is parented to root. Billboard faces are never animated separately.
   const head=new T.Group();head.position.set(0,1.65,.005);root.add(head);
-  const headBase=orb(head,.414,skin,0,0,-.075);headBase.scale.set(1.02,1.09,.79);
+  // The photo already includes the complete hair/hood silhouette. A visible opaque
+  // backing sphere created an unnatural second head, so we omit it entirely.
   const neck=add(root,new T.CylinderGeometry(.122,.14,.24,12),skin,[0,1.42,0]);
   const face=new T.Sprite(new T.SpriteMaterial({
     color:0xffffff,transparent:true,alphaTest:.045,depthWrite:false,depthTest:false
   }));
-  face.name='original-face-photo';face.scale.set(1.05,1.00,1);
-  face.position.set(0,.0,.325);
+  face.name='original-face-photo';face.scale.set(.86,.86,1);
+  face.position.set(0,.005,.305);
   face.renderOrder=15;
   head.add(face);
 
