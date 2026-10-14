@@ -2,11 +2,11 @@ import * as T from './three.module.js';
 import {objects,Mission,levels} from './state.js';
 import {setupLearning,unlockDiscovery} from './learning.js';
 const $=s=>document.querySelector(s),all=s=>[...document.querySelectorAll(s)];
-let choice='hood',currentLevel=1,roomContent=[],forestGroup=null,celebrating=0,mission=new Mission(),running=false,selected=null,walking=null,walkTime=0,inspectModel=null,feedbackPending=false,completed=false;
+let choice='hood',currentLevel=1,roomContent=[],forestGroup=null,oceanGroup=null,oceanBubbles=[],seaFish=[],celebrating=0,mission=new Mission(),running=false,selected=null,walking=null,walkTime=0,inspectModel=null,feedbackPending=false,completed=false;
 let renderer,scene,camera,avatar,face,limbs=[],objectMeshes=new Map(),angle=.65,elevation=.84,zoom=12,viewRenderer,viewScene,viewCamera;
 const clock=new T.Clock(),ray=new T.Raycaster(),pointer=new T.Vector2();
 const mat=(color)=>new T.MeshStandardMaterial({color,roughness:.72});
-const palette={square:0xe9a16d,oval:0x9cacd4,cup:0x93b8a1,ball:0xf0cd78,bowl:0xca9caa,double:0x88b6c2,fruit:0xb54d9e,stone:0x9dae90,egg:0x9de5ec,vine:0x52955a,flower:0xeaa0ba,log:0xb98758,rune:0xa99bea,basket:0xc89b6e};
+const palette={square:0xe9a16d,oval:0x9cacd4,cup:0x93b8a1,ball:0xf0cd78,bowl:0xca9caa,double:0x88b6c2,fruit:0xb54d9e,stone:0x9dae90,egg:0x9de5ec,vine:0x52955a,flower:0xeaa0ba,log:0xb98758,rune:0xa99bea,basket:0xc89b6e,twinGate:0xb4cfba,coralCrown:0xee9cb6,ruinSlab:0x93d6d7,singlePortal:0xc0ae99,seaPearl:0xc9ebef,tripleRelic:0x9aa1d1,treasure:0xe1b46d,kelpRing:0x73b99b};
 const activeObjects=()=>levels[currentLevel].objects;
 const characterInfo={hood:{file:'hood.png',name:'후드 탐험가',color:0x66745d},smile:{file:'smile.png',name:'스마일 탐험가',color:0x384e57},cat:{file:'avatar-cat-head.png',name:'고양이 탐험가',color:0xb37666},cap:{file:'avatar-cap-head.png',name:'모자 탐험가',color:0x698c8d}};
 let victoryTimer=null,fireflies=[],forestOrb=null;
@@ -20,8 +20,43 @@ try{if(localStorage.getItem('topology-level1'))$('#levelStatus').textContent='�
 function mesh(geo,color,parent,x=0,y=0,z=0){const m=new T.Mesh(geo,mat(color));m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;}
 function box(parent,x,y,z,w,h,d,color){return mesh(new T.BoxGeometry(w,h,d),color,parent,x,y,z);}
 function ringShape(kind){const s=new T.Shape();if(kind==='square'){const r=.78;s.moveTo(-r,-r);s.lineTo(r,-r);s.lineTo(r,r);s.lineTo(-r,r);s.closePath();const hole=new T.Path();hole.moveTo(-.43,-.43);hole.lineTo(-.43,.43);hole.lineTo(.43,.43);hole.lineTo(.43,-.43);hole.closePath();s.holes.push(hole);}else{s.moveTo(-1.1,-.65);s.lineTo(1.1,-.65);s.lineTo(1.1,.65);s.lineTo(-1.1,.65);s.closePath();for(const x of [-.53,.53]){const h=new T.Path();h.absarc(x,0,.33,0,Math.PI*2,true);s.holes.push(h);}}return new T.ExtrudeGeometry(s,{depth:.26,bevelEnabled:true,bevelSegments:4,steps:1,bevelSize:.08,bevelThickness:.08,curveSegments:40});}
+
+/** Connected solid extrusions with 2 through-holes have genus-two boundaries.
+ * The wrong triple-hole slab is the same construction with genus three. */
+function underwaterRelicGeometry(id){
+  const s=new T.Shape();
+  if(id==='coralCrown'){
+    for(let i=0;i<=64;i++){const a=i*Math.PI*2/64,r=1.13+.08*Math.cos(7*a);const x=Math.cos(a)*r,y=Math.sin(a)*r*.7;if(i===0)s.moveTo(x,y);else s.lineTo(x,y);}
+    s.closePath();
+  }else if(id==='twinGate'){
+    s.absellipse(0,0,1.2,.79,0,Math.PI*2,false,0);
+  }else{
+    s.moveTo(-1.22,-.72);s.lineTo(1.22,-.72);s.lineTo(1.22,.72);s.lineTo(-1.22,.72);s.closePath();
+  }
+  const isTriple=id==='tripleRelic';
+  const xs=isTriple?[-.69,0,.69]:[-.53,.53];
+  for(const x of xs){
+    const hole=new T.Path();
+    hole.absellipse(x,0,isTriple?.22:.32,isTriple?.29:.36,0,Math.PI*2,true,0);
+    s.holes.push(hole);
+  }
+  return new T.ExtrudeGeometry(s,{depth:.28,steps:1,bevelEnabled:true,bevelSegments:3,bevelThickness:.045,bevelSize:.045,curveSegments:32});
+}
+
 function createObject(id){const g=new T.Group(),color=palette[id];if(id==='square'||id==='double'){const m=mesh(ringShape(id),color,g);m.rotation.x=-Math.PI/2;m.position.y=.13;}if(id==='oval'){const m=mesh(new T.TorusGeometry(.64,.19,24,72),color,g);m.scale.x=1.55;m.rotation.x=-Math.PI/2;m.position.y=.2;}
 if(id==='ball')mesh(new T.SphereGeometry(.64,32,24),color,g,0,.65,0);
+if(['twinGate','coralCrown','ruinSlab','tripleRelic'].includes(id)){
+  const relic=mesh(underwaterRelicGeometry(id),color,g,0,1.05,0);
+  relic.rotation.y=id==='coralCrown'?-.14:.10;
+  relic.material.metalness=id==='ruinSlab'?.36:.12;relic.material.roughness=.46;
+}
+if(id==='singlePortal'||id==='kelpRing'){
+  const ring=mesh(new T.TorusGeometry(.63,.2,20,64),color,g,0,.83,0);
+  ring.scale.y=id==='kelpRing'?1.14:.95;
+}
+if(id==='seaPearl'){const pearl=mesh(new T.SphereGeometry(.64,32,24),color,g,0,.74,0);pearl.material.metalness=.12;pearl.material.roughness=.22;}
+if(id==='treasure'){const treasure=mesh(new T.BoxGeometry(1.13,.79,.85),color,g,0,.53,0);treasure.material.metalness=.18;}
+
 if(id==='fruit'||id==='stone'||id==='egg'){const m=mesh(new T.SphereGeometry(.61,32,24),color,g,0,.65,0);m.scale.set(id==='stone'?1.2:.9,id==='egg'?1.55:id==='fruit'?1.1:.75,id==='fruit'?1.08:.88);if(id==='fruit')mesh(new T.ConeGeometry(.17,.35,8),0x3a9150,g,0,1.35,0);}
 if(['vine','flower','log','rune','basket'].includes(id)){
 const ring=mesh(new T.TorusGeometry(id==='flower'?.63:.55,id==='log'?.26:.18,18,48),color,g,0,.7,0);
