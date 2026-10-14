@@ -1,0 +1,50 @@
+/* LEVEL 03 · Underwater Ruins. Additional styles only; existing levels are untouched. */
+.level-three{margin:0;color:#ecfbff;border-color:#4e96a7;}
+.level-three:before{background:radial-gradient(circle at 78% 10%,#66c9d0a8,transparent 51%),linear-gradient(140deg,#257a8a,#12334b 84%);}
+.level-three .level-icon{color:#a0eced;font-size:38px;}
+.level-three em{color:#c3e2e5;}
+.level-three.active{outline-color:#58bfcb;}
+@media(min-width:1050px){
+  .level-grid:has(.level-three){grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .level-grid:has(.level-three) .level{min-height:202px;padding:63px 13px 13px}
+  .level-grid:has(.level-three) .level strong{font-size:15px}
+}
+@media(min-width:651px) and (max-width:1049px){
+  .level-grid .level-three{grid-column:1/-1;min-height:150px}
+}
+@media(max-width:650px){
+  .level-grid:has(.level-three){grid-template-columns:1fr}
+  .level-grid:has(.level-three) .level{min-height:142px}
+}
+body[data-level="3"].playing{background:#103c55}
+body[data-level="3"] #game{background:#0d4357}
+body[data-level="3"] #game .mission,body[data-level="3"] .collection{
+  background:#113c55e9;color:#ecf9fb;border:1px solid #82cdd341;backdrop-filter:blur(16px)
+}
+body[data-level="3"] .mission small{color:#aae6e7}
+body[data-level="3"] .mission p,body[data-level="3"] .collection p{color:#bfdfe3}
+body[data-level="3"] .target-card{border-color:#4d8490}
+body[data-level="3"] .target-card small{color:#b7e7e9}
+body[data-level="3"] .target-card>span{
+ color:#dcffff;background:radial-gradient(circle at 35% 25%,#e4ffff,#4ab1bd 55%,#14516d);
+ text-shadow:0 0 12px #70eaf8
+}
+body[data-level="3"] #count{color:#bbf4f4}
+body[data-level="3"] .slots span{background:#23536b;color:#b2dce3;border-color:#6d9fad}
+body[data-level="3"] .slots span.found{background:#2b9ba6;border-color:#8debe8;color:white}
+body[data-level="3"] .progress-track{background:#2e6980}
+body[data-level="3"] #progressFill{background:linear-gradient(90deg,#64d7d3,#b0f7e4)}
+body[data-level="3"] .bottom span{color:#d4f2f2}
+body[data-level="3"] .hud-actions button{background:#13516acc;color:#e4f9fc;border-color:#8adbe444}
+body[data-level="3"] .object-dock{background:#103b52e8;border-color:#83cbd83a;color:#ecffff;backdrop-filter:blur(16px)}
+body[data-level="3"] .dock-heading,body[data-level="3"] .dock-heading small{color:#c4e9ed}
+body[data-level="3"] #objectList button{background:#1c5870ee;color:#e5fcff;border-color:#8de1e23d}
+body[data-level="3"] #objectList button.done{background:#348b90;color:white}
+body[data-level="3"] #speech{background:#143f55ed;color:#f2ffff;border:1px solid #78d7e03b}
+body[data-level="3"] #modelView{background:radial-gradient(circle at 50% 35%,#e7fafa,#b5dbdc 65%,#7fb7c1)}
+body[data-level="3"] .player-badge{background:#184d61ed;color:#e9fcff;border-color:#85bfc742}
+body[data-level="3"] .view-controls button{background:#164459e8;color:#dffaff;border-color:#7abbc34f}
+
+/* Keep the underwater hint button legible against the deep-water panel. */
+body[data-level="3"] .collection button{background:#d4f1f1;color:#164a5a;border-color:#83bfc8;font-weight:800}
+body[data-level="3"] .collection button:hover{background:#e5fbfa;color:#113f4b}

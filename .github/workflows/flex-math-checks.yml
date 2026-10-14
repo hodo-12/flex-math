@@ -1,0 +1,42 @@
+name: Flex Math checks
+on:
+  push:
+    branches: [main, feature/underwater-ruins-level3]
+  pull_request:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          node --check app.js
+          node --check state.js
+          node --check learning.js
+      - name: Verify mission behavior
+        run: npm test
+      - name: Install browser test driver
+        run: npm install --no-save --no-package-lock playwright-core@1.56.0
+      - name: Start local game server
+        run: |
+          python3 -m http.server 8080 > /tmp/flex-math-game.log 2>&1 &
+          for n in {1..30}; do
+            curl --fail --silent http://127.0.0.1:8080/ > /dev/null && break
+            sleep 1
+          done
+      - name: Test game in Chrome
+        run: node browser-smoke.mjs
+      - name: Keep screenshots for inspection
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: game-test-screenshots
+          path: |
+            level3-ocean.png
+            level3-complete.png
+            level3-guide.png
+          if-no-files-found: ignore
+
