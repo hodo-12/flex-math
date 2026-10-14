@@ -71,7 +71,7 @@ function animate(){requestAnimationFrame(animate);let dt=Math.min(clock.getDelta
 function updateLevelSelection(){
 $('#level').classList.toggle('active',currentLevel===1);$('#level').setAttribute('aria-pressed',currentLevel===1);$('#level2').setAttribute('aria-pressed',currentLevel===2);
 $('#level2').classList.toggle('active',currentLevel===2);
-$('#start').textContent='LEVEL 0'+currentLevel+' 탐험 시작하기 ↗';
+$('#start').textContent='LEVEL 0'+currentLevel+' 탐험 시작하기';
 }
 function makeForest(){
 forestGroup=new T.Group();scene.add(forestGroup);
