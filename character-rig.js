@@ -53,7 +53,7 @@ export function createCharacterRig(T, scene) {
   const pull=box(coat,.029,.045,.018,metal,.015,.31,.223);
   const collar=garment(coat,[[.14,.39],[.155,.40],[.155,.49],[.14,.49]],seams,.8);
   const hood=orb(coat,.25,cloth,0,.40,-.17);hood.scale.set(1,.68,.65);
-  const hoodInset=orb(hood,.82,inner,0,.28,.28);hoodInset.scale.set(.85,.55,.65);
+  const hoodInset=orb(hood,.19,inner,0,.05,.04);hoodInset.scale.set(.85,.55,.65);
   const pocketL=orb(coat,.12,cloth,-.143,-.085,.163);pocketL.scale.set(1,.72,.26);
   const pocketR=orb(coat,.12,cloth,.143,-.085,.163);pocketR.scale.set(1,.72,.26);
   const pocketSeams=[];
@@ -76,7 +76,7 @@ export function createCharacterRig(T, scene) {
     const forearm=garment(elbow,[[.10,.025],[.105,-.04],[.085,-.23],[.077,-.30]],cloth,.95);
     const cuff=add(elbow,new T.CylinderGeometry(.082,.077,.065,20),seams,[0,-.285,0]);
     const glove=orb(elbow,.085,skin,0,-.38,.012);glove.scale.set(.78,1.25,.64);
-    const thumb=orb(glove,.38,skin,-side*.57,.1,.35);thumb.scale.set(.7,1,.7);
+    const thumb=orb(glove,.034,skin,-side*.05,.01,.03);thumb.scale.set(.7,1,.7);
     piping(elbow,[[0,-.07,.10],[.02,-.10,.105],[.05,-.13,.09]],cloth,.012);
     arms.push({side,shoulder,elbow,sleeve,cuff,forearm,glove});
   }
