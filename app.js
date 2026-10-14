@@ -101,7 +101,11 @@ function start(){clearTimeout(victoryTimer);document.body.classList.add('playing
 function resetView(){angle=currentLevel===2?.18:.65;elevation=.8;zoom=innerWidth<800?17:14;}
 $('#zoomIn').onclick=()=>zoom=T.MathUtils.clamp(zoom-1,8,20);$('#zoomOut').onclick=()=>zoom=T.MathUtils.clamp(zoom+1,8,20);
 $('#start').onclick=start;setupLearning();$('#level').onclick=()=>{currentLevel=1;updateLevelSelection();};$('#level2').onclick=()=>{currentLevel=2;updateLevelSelection();};$('#resetView').onclick=resetView;$('#hint').onclick=()=>speak(levels[currentLevel].hint);function home(){clearTimeout(victoryTimer);document.body.classList.remove('playing');$('#celebrationOverlay').hidden=true;celebrating=0;$('#complete').close();$('#inspect').close();running=false;walking=null;$('#game').hidden=true;$('#lobby').hidden=false;$('#footer').hidden=false;$('#start').focus();}$('#exit').onclick=home;$('#home').onclick=home;$('#replay').onclick=()=>{$('#complete').close();start();};$('#complete').addEventListener('cancel',e=>{e.preventDefault();home();});
-function animate(){requestAnimationFrame(animate);let dt=Math.min(clock.getDelta(),.05);if(!running)return;updateCamera();if(walking){const delta=walking.clone().sub(avatar.position),dist=delta.length();if(dist<.06){avatar.position.copy(walking);walking=null;limbs.forEach(l=>l.rotation.x=0);openInspect();}else{avatar.position.addScaledVector(delta.normalize(),Math.min(dist,dt*2.8));walkTime+=dt*10;limbs.forEach((l,i)=>l.rotation.x=Math.sin(walkTime+(i%2)*Math.PI+(i>1?Math.PI:0))*.3);avatar.position.y=.02+Math.abs(Math.sin(walkTime))*.045;}}else{avatar.position.y=.02+Math.sin(clock.elapsedTime*2)*.016;}if(celebrating>0){celebrating-=dt;avatar.position.y=.02+Math.abs(Math.sin(celebrating*10))*.48;limbs.forEach((l,i)=>l.rotation.z=Math.sin(celebrating*10+i)*.32);}else{limbs.forEach(l=>l.rotation.z=0);}if(currentLevel===2){for(const mote of fireflies){mote.position.y=mote.userData.baseY+Math.sin(clock.elapsedTime*.9+mote.userData.phase)*.2;mote.material.opacity=.45+.4*Math.sin(clock.elapsedTime*1.5+mote.userData.phase);}if(forestOrb)forestOrb.position.y=1.9+Math.sin(clock.elapsedTime)*.12;}renderer.render(scene,camera);if($('#inspect').open&&inspectModel){inspectModel.rotation.y+=dt*.35;viewRenderer.render(viewScene,viewCamera);}}
+function animate(){requestAnimationFrame(animate);let dt=Math.min(clock.getDelta(),.05);if(!running)return;updateCamera();if(walking){const delta=walking.clone().sub(avatar.position),dist=delta.length();if(dist<.06){avatar.position.copy(walking);walking=null;limbs.forEach(l=>l.rotation.x=0);openInspect();}else{avatar.position.addScaledVector(delta.normalize(),Math.min(dist,dt*2.8));walkTime+=dt*10;limbs.forEach((l,i)=>l.rotation.x=Math.sin(walkTime+(i%2)*Math.PI+(i>1?Math.PI:0))*.3);avatar.position.y=.02+Math.abs(Math.sin(walkTime))*.045;}}else{avatar.position.y=.02+Math.sin(clock.elapsedTime*2)*.016;}if(celebrating>0){celebrating-=dt;avatar.position.y=.02+Math.abs(Math.sin(celebrating*10))*.48;limbs.forEach((l,i)=>l.rotation.z=Math.sin(celebrating*10+i)*.32);}else{limbs.forEach(l=>l.rotation.z=0);}if(currentLevel===2){for(const mote of fireflies){mote.position.y=mote.userData.baseY+Math.sin(clock.elapsedTime*.9+mote.userData.phase)*.2;mote.material.opacity=.45+.4*Math.sin(clock.elapsedTime*1.5+mote.userData.phase);}if(forestOrb)forestOrb.position.y=1.9+Math.sin(clock.elapsedTime)*.12;}
+if(currentLevel===3){
+  for(const b of oceanBubbles){b.position.y=.28+((clock.elapsedTime*b.userData.speed+b.userData.y)%4.1);b.position.x=b.userData.x+Math.sin(clock.elapsedTime+b.userData.phase)*.1;}
+  for(const f of seaFish){f.position.x=f.userData.x+Math.sin(clock.elapsedTime*.65+f.userData.phase)*.64;f.position.y=f.userData.y+Math.sin(clock.elapsedTime*.85+f.userData.phase)*.13;}
+}renderer.render(scene,camera);if($('#inspect').open&&inspectModel){inspectModel.rotation.y+=dt*.35;viewRenderer.render(viewScene,viewCamera);}}
 
 function updateLevelSelection(){
 $('#level').classList.toggle('active',currentLevel===1);$('#level').setAttribute('aria-pressed',currentLevel===1);$('#level2').setAttribute('aria-pressed',currentLevel===2);
@@ -126,17 +130,79 @@ const halo=mesh(new T.TorusGeometry(.68,.02,8,64),0xa4e9cb,forestGroup,0,1.9,-3.
 for(const o of activeObjects()){const g=createObject(o.id);g.position.set(o.x,.12,o.z);forestGroup.add(g);objectMeshes.set(o.id,g);const marker=mesh(new T.CylinderGeometry(.78,.82,.05,40),0x9daf91,forestGroup,o.x,.07,o.z);marker.material.roughness=1;}
 for(let i=0;i<32;i++){const mote=mesh(new T.SphereGeometry(.025,6,6),0xc8f8a6,forestGroup,Math.sin(i*2.4)*5,.6+(i%7)*.32,Math.cos(i*1.7)*4);mote.material=new T.MeshBasicMaterial({color:0xd8ffb7,transparent:true,opacity:.75});mote.userData={baseY:mote.position.y,phase:i*.7};fireflies.push(mote);}
 }
+
+function makeOcean(){
+  oceanGroup=new T.Group();scene.add(oceanGroup);
+  // Pale sandy clearing surrounded by ancient sea ruins.
+  const bed=mesh(new T.CylinderGeometry(6.6,6.4,.78,64),0x205d69,oceanGroup,0,-.45,0);bed.scale.z=.82;
+  const sand=mesh(new T.CylinderGeometry(6.45,6.45,.12,64),0x93b5a2,oceanGroup,0,.01,0);sand.scale.z=.82;
+  const path=mesh(new T.CylinderGeometry(4.5,4.65,.035,64),0xb1c4aa,oceanGroup,0,.09,-.1);path.scale.z=.77;
+  const stone=(x,y,z,r=.33,col=0x6b9997)=>mesh(new T.IcosahedronGeometry(r,0),col,oceanGroup,x,y,z);
+  // Pillars and arch fragments live outside the object-selection path.
+  const column=(x,z,h=2)=>{
+    mesh(new T.CylinderGeometry(.36,.43,.2,12),0x709f9e,oceanGroup,x,.19,z);
+    mesh(new T.CylinderGeometry(.22,.26,h,12),0x85aaa5,oceanGroup,x,.3+h/2,z);
+    mesh(new T.CylinderGeometry(.39,.32,.22,12),0xa5bdaf,oceanGroup,x,.4+h,z);
+  };
+  for(const [x,z,h] of [[-5.15,-3,2.6],[5.15,-3,2.4],[-5.2,2.3,1.2],[5.25,2.4,1.55]])column(x,z,h);
+  const archTop=mesh(new T.TorusGeometry(2,.27,12,52,Math.PI),0x729d9e,oceanGroup,0,2.3,-4.5);
+  archTop.rotation.z=0;
+  column(-2,-4.5,2.2);column(2,-4.5,2.2);
+  for(let i=0;i<8;i++){
+    const a=i*2.399,x=Math.cos(a)*5.65,z=Math.sin(a)*4.1;
+    const rock=stone(x,.18,z,.25+(i%3)*.13,0x577e80);rock.scale.y=.55;
+    const coral=mesh(new T.ConeGeometry(.18+(i%2)*.10,.8+(i%3)*.18,7),i%2?0xf49d9a:0x8bd4bc,oceanGroup,x,.45,z);
+    coral.rotation.z=Math.sin(i)*.2;
+  }
+  // Low, flexible seaweed stands around the edges.
+  for(let i=0;i<15;i++){
+    const a=i*2.4,r=5.1+(i%3)*.24,x=Math.cos(a)*r,z=Math.sin(a)*r*.76;
+    for(let j=0;j<3;j++){
+      const leaf=mesh(new T.CapsuleGeometry(.055,.42+(i%3)*.18,4,6),j%2?0x4aab91:0x76c7a1,oceanGroup,x+j*.15,.4+(i%3)*.09,z+j*.06);
+      leaf.rotation.z=(j-1)*.25;
+    }
+  }
+  for(const o of activeObjects()){
+    const pedestal=mesh(new T.CylinderGeometry(.87,.95,.19,16),0x658f8f,oceanGroup,o.x,.13,o.z);
+    const inset=mesh(new T.CylinderGeometry(.73,.73,.035,36),0x82b6ab,oceanGroup,o.x,.245,o.z);
+    const artifact=createObject(o.id);artifact.position.set(o.x,.29,o.z);
+    artifact.scale.setScalar(o.id==='treasure'?.85:.82);
+    oceanGroup.add(artifact);objectMeshes.set(o.id,artifact);
+  }
+  // Rising bubbles are scene decoration and never part of selectable meshes.
+  oceanBubbles=[];
+  for(let i=0;i<34;i++){
+    const x=Math.sin(i*2.31)*5,z=Math.cos(i*1.92)*3.95;
+    const b=new T.Mesh(new T.SphereGeometry(.035+(i%4)*.023,8,6),new T.MeshBasicMaterial({color:0xc8f8ff,transparent:true,opacity:.35,depthWrite:false}));
+    b.position.set(x,.4+(i%9)*.40,z);b.userData={x,y:b.position.y,speed:.25+(i%6)*.1,phase:i*.41};oceanGroup.add(b);oceanBubbles.push(b);
+  }
+  seaFish=[];
+  for(let i=0;i<4;i++){
+    const fish=new T.Group();
+    const body=mesh(new T.SphereGeometry(.18,12,8),[0xffd5a2,0xa5e6dd,0xe8b6d3,0xc7dae5][i],fish);
+    body.scale.set(1.45,.68,.65);
+    const tail=mesh(new T.ConeGeometry(.14,.30,3),body.material.color,fish,-.32,0,0);
+    tail.rotation.z=Math.PI/2;
+    fish.position.set(i%2?4.6:-4.6,1.55+(i%3)*.36,-3.5+(i%2)*1.1);
+    fish.userData={x:fish.position.x,y:fish.position.y,phase:i*1.7};
+    oceanGroup.add(fish);seaFish.push(fish);
+  }
+  const ambient=new T.PointLight(0x8edddd,4,15);ambient.position.set(0,5,0);oceanGroup.add(ambient);
+}
+
 function switchLevelWorld(){
 roomContent.forEach(x=>x.visible=currentLevel===1);
 fireflies=[];forestOrb=null;if(forestGroup){scene.remove(forestGroup);disposeGroup(forestGroup);forestGroup=null;}
+  oceanBubbles=[];seaFish=[];if(oceanGroup){scene.remove(oceanGroup);disposeGroup(oceanGroup);oceanGroup=null;}
 objectMeshes.clear();
 if(currentLevel===1){for(const o of objects){const g=roomContent.find(x=>x.userData?.id===o.id);if(g)objectMeshes.set(o.id,g);}}
-else makeForest();
-$('#targetGlyph').textContent=currentLevel===2?'●':'◎';$('#targetName').textContent=currentLevel===2?'구슬의 표면':'도넛의 표면';scene.background=new T.Color(currentLevel===2?0x102f32:0xe9eddf);
-scene.fog.color.set(currentLevel===2?0x102f32:0xe9eddf);scene.fog.near=currentLevel===2?20:22;scene.fog.far=currentLevel===2?36:42;
+else if(currentLevel===2)makeForest();
+else makeOcean();
+$('#targetGlyph').textContent=currentLevel===3?'∞':currentLevel===2?'●':'◎';$('#targetName').textContent=currentLevel===3?'쌍고리 표면 · 종수 2':currentLevel===2?'구슬의 표면':'도넛의 표면';scene.background=new T.Color(currentLevel===3?0x104a65:currentLevel===2?0x102f32:0xe9eddf);
+scene.fog.color.set(currentLevel===3?0x104a65:currentLevel===2?0x102f32:0xe9eddf);scene.fog.near=currentLevel===3?17:currentLevel===2?20:22;scene.fog.far=currentLevel===3?35:currentLevel===2?36:42;
 $('#game .mission small').textContent='LEVEL 0'+currentLevel+' / '+levels[currentLevel].place;
 $('#game .mission h2').textContent=levels[currentLevel].description;
-$('#game .mission p').textContent='물체의 전체 경계 표면을 비교해요. 세 가지를 모으면 성공!';$('.collection p').textContent=currentLevel===2?'잘린 곳 없이 구처럼 바꿀 수 있는 닫힌 표면을 찾으세요.':'자르거나 붙이지 않고 고리로 바꿀 수 있을까요?';
-$('#complete .results').textContent=currentLevel===2?'숲 열매 · 마법 돌 · 수정 알 — 모두 구면과 위상동형':'사각 고리 · 길쭉한 고리 · 손잡이 컵 — 모두 도넛과 위상동형';
+$('#game .mission p').textContent='물체의 전체 경계 표면을 비교해요. 세 가지를 모으면 성공!';$('.collection p').textContent=currentLevel===3?'서로 독립적인 관통 구멍이 두 개인 하나의 닫힌 표면을 찾아요.':currentLevel===2?'잘린 곳 없이 구처럼 바꿀 수 있는 닫힌 표면을 찾으세요.':'자르거나 붙이지 않고 고리로 바꿀 수 있을까요?';
+$('#complete .results').textContent=currentLevel===3?'쌍문 유적석 · 쌍고리 산호 왕관 · 두 눈 수정 유물 — 모두 종수 2의 표면':currentLevel===2?'숲 열매 · 마법 돌 · 수정 알 — 모두 구면과 위상동형':'사각 고리 · 길쭉한 고리 · 손잡이 컵 — 모두 도넛과 위상동형';
 }
 try{if(localStorage.getItem('topology-level2'))$('#level2Status').textContent='클리어 ✓';}catch{}
