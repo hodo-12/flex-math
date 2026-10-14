@@ -110,7 +110,7 @@ export function createCharacterRig(T, scene) {
     if(texture){face.material.map=texture;face.material.needsUpdate=true;}
   };
   const reset=()=>{
-    gait=0;blend=0;rotation=0;jumpClock=0;wasCelebrating=false;
+    gait=0;blend=0;yaw=0;jumpClock=0;wasCelebrating=false;
     root.position.y=.02;root.rotation.y=0;
     coat.rotation.set(0,0,0);pelvis.rotation.set(0,0,0);
     for(const a of arms){a.shoulder.rotation.set(0,0,0);a.elbow.rotation.set(0,0,0);}
