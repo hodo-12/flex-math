@@ -1,7 +1,7 @@
 name: Flex Math checks
 on:
   push:
-    branches: [main, feature/underwater-ruins-level3]
+    branches: [main, feature/underwater-ruins-level3, feature/realistic-character-rig-no-deploy]
   pull_request:
 jobs:
   verify:
@@ -14,6 +14,7 @@ jobs:
       - name: Check JavaScript syntax
         run: |
           node --check app.js
+          node --check character-rig.js
           node --check state.js
           node --check learning.js
       - name: Verify mission behavior
@@ -29,6 +30,9 @@ jobs:
           done
       - name: Test game in Chrome
         run: node browser-smoke.mjs
+      - name: Capture character preview (development branch only)
+        if: github.ref == 'refs/heads/feature/realistic-character-rig-no-deploy'
+        run: node character-preview.mjs
       - name: Keep screenshots for inspection
         if: always()
         uses: actions/upload-artifact@v4
@@ -38,5 +42,8 @@ jobs:
             level3-ocean.png
             level3-complete.png
             level3-guide.png
+            avatar-hood-idle.png
+            avatar-cat-walk.png
+            avatar-cap-idle.png
           if-no-files-found: ignore
 
