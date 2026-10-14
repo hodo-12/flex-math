@@ -1,0 +1,20 @@
+/* CHARACTER POLISH ONLY — existing levels and controls are untouched. */
+.character{position:relative;isolation:isolate;box-shadow:0 6px 19px #243c3220;transition:box-shadow .24s,transform .24s,border-color .24s}
+.character:hover{box-shadow:0 16px 32px #243c322c;transform:translateY(-3px)}
+.character.selected{box-shadow:0 0 0 1px #3b8d75,0 17px 32px #2859442b}
+.character .portrait{background-image:radial-gradient(ellipse at 50% 30%,#ffffff77,transparent 70%);}
+.character .portrait:after{content:'';position:absolute;inset:auto 10px 8px;height:28px;border-radius:50%;background:#16251e14;filter:blur(9px);pointer-events:none}
+.character .shirt{box-shadow:inset 0 13px 10px #ffffff1c,0 -3px 0 #fff6;border:2px solid #1f3b3c16}
+.character .shirt:before{content:'';position:absolute;width:34px;height:37px;left:50%;top:3px;transform:translateX(-50%);background:#e9e6dd;clip-path:polygon(0 0,50% 72%,100% 0,100% 22%,50% 92%,0 22%);}
+.character .shirt:after{content:'';position:absolute;width:4px;height:30px;left:50%;top:17px;background:#d7d1c4;border-radius:5px;opacity:.8}
+.character[data-character="hood"] .shirt{background:#576e5b}
+.character[data-character="smile"] .shirt{background:#354950}
+.character[data-character="cat"] .shirt{background:#9d5e55}
+.character[data-character="cap"] .shirt{background:#527d82}
+.character .outfit-chip{display:inline-flex;align-items:center;gap:5px;margin:6px 5px 0;padding:5px 9px;border-radius:999px;color:#44685c;background:#eef2e8;border:1px solid #dce5d7;font-size:10px;font-weight:750;line-height:1.1;letter-spacing:-.2px}
+.character .outfit-chip:before{content:'✦';font-size:8px;color:#7da593}
+.character.selected .outfit-chip{background:#e4f0e8;border-color:#a5cdb7;color:#28634b}
+.character[data-character="cat"] .outfit-chip{background:#faeeeb;color:#975f56;border-color:#efdad4}
+.character[data-character="cap"] .outfit-chip{background:#eaf4f3;color:#3a6b76;border-color:#cfe2e2}
+@media(prefers-reduced-motion:reduce){.character,.character:hover{transition:none;transform:none}}
+@media(max-width:800px){.character .outfit-chip{font-size:9px;padding:4px 7px;white-space:normal}}
