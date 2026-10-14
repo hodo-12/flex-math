@@ -68,11 +68,11 @@ export function createCharacterRig(T, scene) {
   const strapR=box(coat,.037,.49,.028,rubber,.23,.10,.14);
   const arms=[];
   for(const side of [-1,1]){
-    const shoulder=new T.Group();shoulder.position.set(side*.32,.33,0);coat.add(shoulder);
-    const cap=orb(shoulder,.13,cloth,side*.012,-.045,0);cap.scale.y=1.1;
+    const shoulder=new T.Group();shoulder.position.set(side*.295,.32,0);coat.add(shoulder);
+    const cap=orb(shoulder,.107,cloth,side*.012,-.045,0);cap.scale.set(.94,1.13,.96);
     const sleeve=garment(shoulder,[[0,.015],[.12,0],[.125,-.08],[.103,-.28],[.10,-.34],[0,-.35]],cloth,.93);
     const elbow=new T.Group();elbow.position.set(0,-.34,0);shoulder.add(elbow);
-    orb(elbow,.10,cloth);
+    const elbowCover=orb(elbow,.084,cloth);elbowCover.scale.set(.92,1.1,.86);
     const forearm=garment(elbow,[[.10,.025],[.105,-.04],[.085,-.23],[.077,-.30]],cloth,.95);
     const cuff=add(elbow,new T.CylinderGeometry(.082,.077,.065,20),seams,[0,-.285,0]);
     const glove=orb(elbow,.085,skin,0,-.38,.012);glove.scale.set(.78,1.25,.64);
@@ -85,12 +85,12 @@ export function createCharacterRig(T, scene) {
     const hip=new T.Group();hip.position.set(side*.145,-.035,0);pelvis.add(hip);
     const thigh=garment(hip,[[0,.06],[.135,.035],[.14,-.08],[.115,-.30],[.106,-.43]],trousers,.93);
     const knee=new T.Group();knee.position.y=-.43;hip.add(knee);
-    orb(knee,.106,trousers);
+    const kneeCover=orb(knee,.091,trousers);kneeCover.scale.set(.98,1.07,.86);
     const shin=garment(knee,[[.105,.02],[.107,-.05],[.09,-.28],[.085,-.43]],trousers);
     const trouserCuff=add(knee,new T.CylinderGeometry(.087,.087,.045,20),trousers,[0,-.405,0]);
     const foot=new T.Group();foot.position.y=-.43;knee.add(foot);
-    const shoe=orb(foot,.15,shoes,0,-.026,.065);shoe.scale.set(.70,.52,1.42);
-    const sole=orb(foot,.15,rubber,0,-.067,.065);sole.scale.set(.74,.20,1.45);
+    const shoe=orb(foot,.15,shoes,0,-.026,.065);shoe.scale.set(.70,.52,1.27);
+    const sole=orb(foot,.15,rubber,0,-.067,.065);sole.scale.set(.74,.20,1.33);
     const heel=orb(foot,.10,seams,0,-.015,-.055);heel.scale.set(.9,.65,.65);
     for(let j=0;j<3;j++)piping(foot,[[-.052,.027-j*.005,.055+j*.033],[0,.037-j*.005,.06+j*.033],[.052,.027-j*.005,.055+j*.033]],inner,.006);
     legs.push({side,hip,knee,foot,thigh,shin,trouserCuff,anchor:new T.Vector3(),from:new T.Vector3(),to:new T.Vector3(),lastPhase:0,planted:true});
