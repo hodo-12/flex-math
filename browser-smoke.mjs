@@ -58,7 +58,7 @@ try{
   assert.match(await page.locator('#learningContent').innerText(),/종수 2/);
   assert.match(await page.locator('#learningContent').innerText(),/9/);
   await page.locator('[data-learn-tab="quiz"]').click();
-  await page.getByRole('button',{name:/바닷속 유적/}).click();
+  await page.locator('.quiz-modes button').filter({hasText:'바닷속 유적'}).click();
   assert.match(await page.locator('#learningContent').innerText(),/종수 2/);
   await page.screenshot({path:'level3-guide.png'});
   assert.deepEqual(errors,[],'No uncaught browser JS errors');
