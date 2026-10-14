@@ -44,3 +44,7 @@ body[data-level="3"] #speech{background:#143f55ed;color:#f2ffff;border:1px solid
 body[data-level="3"] #modelView{background:radial-gradient(circle at 50% 35%,#e7fafa,#b5dbdc 65%,#7fb7c1)}
 body[data-level="3"] .player-badge{background:#184d61ed;color:#e9fcff;border-color:#85bfc742}
 body[data-level="3"] .view-controls button{background:#164459e8;color:#dffaff;border-color:#7abbc34f}
+
+/* Keep the underwater hint button legible against the deep-water panel. */
+body[data-level="3"] .collection button{background:#d4f1f1;color:#164a5a;border-color:#83bfc8;font-weight:800}
+body[data-level="3"] .collection button:hover{background:#e5fbfa;color:#113f4b}
