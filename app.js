@@ -1,9 +1,10 @@
 import * as T from './three.module.js';
+import {createCharacterRig} from './character-rig.js';
 import {objects,Mission,levels} from './state.js';
 import {setupLearning,unlockDiscovery} from './learning.js';
 const $=s=>document.querySelector(s),all=s=>[...document.querySelectorAll(s)];
 let choice='hood',currentLevel=1,roomContent=[],forestGroup=null,oceanGroup=null,oceanBubbles=[],seaFish=[],celebrating=0,mission=new Mission(),running=false,selected=null,walking=null,walkTime=0,inspectModel=null,feedbackPending=false,completed=false;
-let renderer,scene,camera,avatar,face,limbs=[],objectMeshes=new Map(),angle=.65,elevation=.84,zoom=12,viewRenderer,viewScene,viewCamera;
+let renderer,scene,camera,avatar,face,characterRig=null,objectMeshes=new Map(),angle=.65,elevation=.84,zoom=12,viewRenderer,viewScene,viewCamera;
 const clock=new T.Clock(),ray=new T.Raycaster(),pointer=new T.Vector2();
 const mat=(color)=>new T.MeshStandardMaterial({color,roughness:.72});
 const palette={square:0xe9a16d,oval:0x9cacd4,cup:0x93b8a1,ball:0xf0cd78,bowl:0xca9caa,double:0x88b6c2,fruit:0xb54d9e,stone:0x9dae90,egg:0x9de5ec,vine:0x52955a,flower:0xeaa0ba,log:0xb98758,rune:0xa99bea,basket:0xc89b6e,twinGate:0xb4cfba,coralCrown:0xee9cb6,ruinSlab:0x93d6d7,singlePortal:0xc0ae99,seaPearl:0xc9ebef,tripleRelic:0x9aa1d1,treasure:0xe1b46d,kelpRing:0x73b99b};
@@ -82,9 +83,20 @@ const guide=mesh(new T.TorusGeometry(.4,.14,20,48),0xc6af6f,scene,-.6,2.9,-4.26)
 roomContent=[...scene.children].filter(x=>!x.isLight);
 createAvatar();setupInput();viewRenderer=new T.WebGLRenderer({antialias:true,alpha:true});viewRenderer.setPixelRatio(Math.min(devicePixelRatio,2));$('#modelView').append(viewRenderer.domElement);viewScene=new T.Scene();lights(viewScene);viewCamera=new T.PerspectiveCamera(38,1,.1,30);viewCamera.position.set(2,2.7,3.4);viewCamera.lookAt(0,.3,0);let vx=null;viewRenderer.domElement.onpointerdown=e=>{vx=e.clientX;viewRenderer.domElement.setPointerCapture(e.pointerId);};viewRenderer.domElement.onpointermove=e=>{if(vx!==null&&inspectModel){inspectModel.rotation.y+=(e.clientX-vx)*.015;vx=e.clientX;}};viewRenderer.domElement.onpointerup=()=>vx=null;viewRenderer.domElement.onpointercancel=()=>vx=null;
 new ResizeObserver(resize).observe($('#world'));animate();}
-const textures={};function createAvatar(){avatar=new T.Group();scene.add(avatar);const torso=mesh(new T.CapsuleGeometry(.28,.37,8,16),choice==='hood'||choice==='cap'?0x5f6251:0x303c3c,avatar,0,.84,0);avatar.userData.torso=torso;for(const side of [-1,1]){let arm=mesh(new T.CapsuleGeometry(.085,.34,6,12),0x626652,avatar,side*.38,.88,0);limbs.push(arm);mesh(new T.SphereGeometry(.105,12,12),0xe0b498,arm,0,-.25,0);let leg=mesh(new T.CapsuleGeometry(.105,.33,6,12),0x36443f,avatar,side*.16,.35,0);limbs.push(leg);mesh(new T.BoxGeometry(.23,.12,.34),0xf2f0de,leg,0,-.22,.07);}
-for(const c of ['hood','smile','cat','cap']){textures[c]=new T.TextureLoader().load(characterInfo[c].file);textures[c].colorSpace=T.SRGBColorSpace;}
-face=new T.Sprite(new T.SpriteMaterial({map:textures[choice],transparent:true,depthTest:true}));face.scale.set(1.14,1.05,1);face.position.y=1.58;avatar.add(face);avatar.position.set(-1.1,.02,2.4);}
+const textures={};function createAvatar(){
+  // Preserve all four original face textures, while replacing only the stiff body mesh.
+  for(const id of Object.keys(characterInfo)){
+    const tx=new T.TextureLoader().load(characterInfo[id].file);
+    tx.colorSpace=T.SRGBColorSpace;
+    textures[id]=tx;
+  }
+  characterRig=createCharacterRig(T,scene);
+  avatar=characterRig.root;
+  face=characterRig.face;
+  characterRig.setCharacter(choice,textures[choice]);
+  characterRig.reset();
+  avatar.position.set(-1.1,.02,2.4);
+}
 function resize(){if(!renderer)return;const w=$('#world').clientWidth,h=$('#world').clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
 function updateCamera(){camera.position.set(Math.sin(angle)*zoom,zoom*elevation,Math.cos(angle)*zoom);camera.lookAt(0,.2,0);}
 function setupInput(){const canvas=renderer.domElement;let down=null;canvas.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY,lx:e.clientX,ly:e.clientY,moved:false};canvas.setPointerCapture(e.pointerId);});canvas.addEventListener('pointermove',e=>{if(down){if(Math.hypot(e.clientX-down.x,e.clientY-down.y)>6)down.moved=true;if(down.moved){angle-=(e.clientX-down.lx)*.006;elevation=T.MathUtils.clamp(elevation+(e.clientY-down.ly)*.003,.4,1.6);}down.lx=e.clientX;down.ly=e.clientY;}});canvas.addEventListener('pointerup',e=>{if(down&&!down.moved){const r=canvas.getBoundingClientRect();pointer.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(pointer,camera);const hits=ray.intersectObjects([...objectMeshes.values()].filter(g=>g.visible),true);if(hits.length){let g=hits[0].object;while(!g.userData.id&&g.parent)g=g.parent;if(g.userData.id)choose(g.userData.id);}}down=null;});canvas.addEventListener('pointercancel',()=>down=null);canvas.addEventListener('wheel',e=>{e.preventDefault();zoom=T.MathUtils.clamp(zoom+e.deltaY*.01,8,20);},{passive:false});}
@@ -97,11 +109,39 @@ if(res.collected){const newCard=unlockDiscovery(currentLevel,selected.id);for(le
 function updateProgress(){$('#progressFill').style.width=(mission.found.size/3*100)+'%';$('#count').textContent=mission.found.size+' / 3';const found=[...mission.found];all('.slots span').forEach((s,i)=>{s.textContent=found[i]?activeObjects().find(o=>o.id===found[i]).symbol:'?';s.classList.toggle('found',!!found[i]);s.title=found[i]?activeObjects().find(o=>o.id===found[i]).name:'아직 발견하지 않은 물건';});all('#objectList button').forEach(b=>{const done=mission.found.has(b.dataset.id);b.classList.toggle('done',done);b.disabled=done;const item=activeObjects().find(o=>o.id===b.dataset.id);b.innerHTML='<span class=object-symbol>'+item.symbol+'</span><span>'+item.name+'</span><i>'+(done?'✓':'↗')+'</i>';});}
 function closeInspect(){$('#inspect').close();if(mission.found.size===3){completed=true;$('#resultStats').textContent='세 가지 발견 완료 · 총 '+mission.attempts+'번 관찰했어요';$('#complete').querySelector('.eyebrow').textContent='LEVEL 0'+currentLevel+' COMPLETE';$('#complete').querySelector('h2').textContent='성공했다!! 🎉';try{localStorage.setItem('topology-level'+currentLevel,'complete');}catch{}if(currentLevel===1)$('#levelStatus').textContent='클리어 ✓';if(currentLevel===2)$('#level2Status').textContent='클리어 ✓';if(currentLevel===3)$('#level3Status').textContent='클리어 ✓';celebrating=3;$('#celebrationOverlay').hidden=false;avatar.position.set(0,.02,1);victoryTimer=setTimeout(()=>{if(!running||!completed)return;$('#celebrationOverlay').hidden=true;$('#complete').showModal();$('#complete').classList.add('victory');setTimeout(()=>$('#complete').classList.remove('victory'),3500);},3000);}}
 $('#yes').onclick=()=>answer(true);$('#no').onclick=()=>answer(false);$('#continue').onclick=closeInspect;$('#closeInspect').onclick=closeInspect;$('#inspect').addEventListener('cancel',e=>{e.preventDefault();closeInspect();});
-function start(){clearTimeout(victoryTimer);document.body.classList.add('playing');document.body.dataset.level=currentLevel;$('#playerFace').src=characterInfo[choice].file;$('#playerName').textContent=characterInfo[choice].name;$('#celebrationOverlay').hidden=true;celebrating=0;limbs.forEach(l=>{l.rotation.x=0;l.rotation.z=0;});try{if(!renderer)init();}catch(e){document.body.classList.remove('playing');$('#error').hidden=false;$('#error').textContent='3D 화면을 시작하지 못했어요. WebGL을 지원하는 최신 브라우저에서 다시 열어 주세요.';console.error(e);return;}mission=new Mission(currentLevel);switchLevelWorld();running=true;completed=false;walking=null;selected=null;face.material.map=textures[choice];avatar.userData.torso.material.color.set(characterInfo[choice].color);[limbs[0],limbs[2]].forEach(l=>l.material.color.set(characterInfo[choice].color));avatar.position.set(-1.1,.02,2.4);for(const g of objectMeshes.values())g.visible=true;$('#lobby').hidden=true;$('#footer').hidden=true;$('#game').hidden=false;$('#objectList').replaceChildren();activeObjects().forEach(o=>{const b=document.createElement('button');b.textContent=o.name;b.dataset.id=o.id;b.onclick=()=>choose(o.id);$('#objectList').append(b);});updateProgress();resetView();resize();speak('물건을 눌러 함께 살펴봐요!');$('#start').blur();}
+function start(){clearTimeout(victoryTimer);document.body.classList.add('playing');document.body.dataset.level=currentLevel;$('#playerFace').src=characterInfo[choice].file;$('#playerName').textContent=characterInfo[choice].name;$('#celebrationOverlay').hidden=true;celebrating=0;try{if(!renderer)init();}catch(e){document.body.classList.remove('playing');$('#error').hidden=false;$('#error').textContent='3D 화면을 시작하지 못했어요. WebGL을 지원하는 최신 브라우저에서 다시 열어 주세요.';console.error(e);return;}mission=new Mission(currentLevel);switchLevelWorld();running=true;completed=false;walking=null;selected=null;characterRig.reset();characterRig.setCharacter(choice,textures[choice]);avatar.position.set(-1.1,.02,2.4);for(const g of objectMeshes.values())g.visible=true;$('#lobby').hidden=true;$('#footer').hidden=true;$('#game').hidden=false;$('#objectList').replaceChildren();activeObjects().forEach(o=>{const b=document.createElement('button');b.textContent=o.name;b.dataset.id=o.id;b.onclick=()=>choose(o.id);$('#objectList').append(b);});updateProgress();resetView();resize();speak('물건을 눌러 함께 살펴봐요!');$('#start').blur();}
 function resetView(){angle=currentLevel===2?.18:.65;elevation=.8;zoom=innerWidth<800?17:14;}
 $('#zoomIn').onclick=()=>zoom=T.MathUtils.clamp(zoom-1,8,20);$('#zoomOut').onclick=()=>zoom=T.MathUtils.clamp(zoom+1,8,20);
 $('#start').onclick=start;setupLearning();$('#level').onclick=()=>{currentLevel=1;updateLevelSelection();};$('#level2').onclick=()=>{currentLevel=2;updateLevelSelection();};$('#level3').onclick=()=>{currentLevel=3;updateLevelSelection();};$('#resetView').onclick=resetView;$('#hint').onclick=()=>speak(levels[currentLevel].hint);function home(){clearTimeout(victoryTimer);document.body.classList.remove('playing');$('#celebrationOverlay').hidden=true;celebrating=0;$('#complete').close();$('#inspect').close();running=false;walking=null;$('#game').hidden=true;$('#lobby').hidden=false;$('#footer').hidden=false;$('#start').focus();}$('#exit').onclick=home;$('#home').onclick=home;$('#replay').onclick=()=>{$('#complete').close();start();};$('#complete').addEventListener('cancel',e=>{e.preventDefault();home();});
-function animate(){requestAnimationFrame(animate);let dt=Math.min(clock.getDelta(),.05);if(!running)return;updateCamera();if(walking){const delta=walking.clone().sub(avatar.position),dist=delta.length();if(dist<.06){avatar.position.copy(walking);walking=null;limbs.forEach(l=>l.rotation.x=0);openInspect();}else{avatar.position.addScaledVector(delta.normalize(),Math.min(dist,dt*2.8));walkTime+=dt*10;limbs.forEach((l,i)=>l.rotation.x=Math.sin(walkTime+(i%2)*Math.PI+(i>1?Math.PI:0))*.3);avatar.position.y=.02+Math.abs(Math.sin(walkTime))*.045;}}else{avatar.position.y=.02+Math.sin(clock.elapsedTime*2)*.016;}if(celebrating>0){celebrating-=dt;avatar.position.y=.02+Math.abs(Math.sin(celebrating*10))*.48;limbs.forEach((l,i)=>l.rotation.z=Math.sin(celebrating*10+i)*.32);}else{limbs.forEach(l=>l.rotation.z=0);}if(currentLevel===2){for(const mote of fireflies){mote.position.y=mote.userData.baseY+Math.sin(clock.elapsedTime*.9+mote.userData.phase)*.2;mote.material.opacity=.45+.4*Math.sin(clock.elapsedTime*1.5+mote.userData.phase);}if(forestOrb)forestOrb.position.y=1.9+Math.sin(clock.elapsedTime)*.12;}
+function animate(){
+  requestAnimationFrame(animate);
+  const dt=Math.min(clock.getDelta(),.05);
+  if(!running)return;
+  updateCamera();
+  let isMoving=false;
+  let moveAngle=avatar.rotation.y;
+  if(walking){
+    // Horizontal-only movement avoids conflicts with animation-driven body bounce.
+    const delta=new T.Vector3(walking.x-avatar.position.x,0,walking.z-avatar.position.z);
+    const distance=delta.length();
+    if(distance<.07){
+      avatar.position.x=walking.x;
+      avatar.position.z=walking.z;
+      walking=null;
+      openInspect();
+    }else{
+      moveAngle=Math.atan2(delta.x,delta.z);
+      avatar.position.addScaledVector(delta.normalize(),Math.min(distance,dt*2.8));
+      isMoving=true;
+    }
+  }
+  const jumping=celebrating>0;
+  if(jumping)celebrating=Math.max(0,celebrating-dt);
+  characterRig.tick({
+    dt,time:clock.elapsedTime,moving:isMoving,
+    targetAngle:moveAngle,cameraPosition:camera.position,celebrating:jumping
+  });
+  if(currentLevel===2){for(const mote of fireflies){mote.position.y=mote.userData.baseY+Math.sin(clock.elapsedTime*.9+mote.userData.phase)*.2;mote.material.opacity=.45+.4*Math.sin(clock.elapsedTime*1.5+mote.userData.phase);}if(forestOrb)forestOrb.position.y=1.9+Math.sin(clock.elapsedTime)*.12;}
 if(currentLevel===3){
   for(const b of oceanBubbles){b.position.y=.28+((clock.elapsedTime*b.userData.speed+b.userData.y)%4.1);b.position.x=b.userData.x+Math.sin(clock.elapsedTime+b.userData.phase)*.1;}
   for(const f of seaFish){f.position.x=f.userData.x+Math.sin(clock.elapsedTime*.65+f.userData.phase)*.64;f.position.y=f.userData.y+Math.sin(clock.elapsedTime*.85+f.userData.phase)*.13;}
