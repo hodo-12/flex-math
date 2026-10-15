@@ -82,3 +82,40 @@ browser uses real time, unmodified WebGL and reduced-motion settings.
 Original faces are intentionally billboard photos. This mode does not try
 to create a photorealistic 3D head, complex cloth physics, manual driving or
 online multiplayer. It prioritizes a stable shared track and funny reactions.
+
+## Verified review — 2026-10-15
+
+Runtime commit: `65be4b50c49cb2a5de8b5919d1a8c36a0e34758c`.
+[Successful complete workflow](https://github.com/hodo-12/flex-math/actions/runs/38731937244).
+
+- 49 distinct automated checks passed (31 main/rig/SPECIAL + 7 BONUS + 11 KART;
+  the existing workflow additionally repeats the 9 shared-rig checks).
+- KART Chrome/WebGL: five loaded original photos, countdown and simultaneous
+  driving, boost/cooldown, overtaking, reciprocal contacts, all five finishers,
+  winner/loser tableau, pause, interrupted reset, selection and opt-in music.
+- Separate real-time 390px mobile session: reduced motion, no horizontal
+  overflow, whole-pack close view, visible fixed boost/pause controls.
+- BONUS and SPECIAL: correct wins, wrong losses, four rounds, animation
+  progression, input locks, reset, reduced motion, mobile and lobby return.
+- Main game: level 3 wrong answer, three correct choices, completion, existing
+  level entry, atlas and quiz. Existing runtime/face hash baselines also passed.
+
+The images below are actual Chrome captures from that verified commit. The
+follow-up commit adds only these captures and this review record; no runtime
+code changes. The PR remains open and unmerged. No Pages deployment was made.
+
+### Five friends including the new green princess
+
+![Original faces and distinct karts](previews/green-princess.png)
+
+### Shared race and contact reaction
+
+![All five racing in the same space](previews/close-race.png)
+
+[Whole-circuit race view](previews/racing.png)
+
+### Finish and reactions
+
+![Winner and all five finishers](previews/finish.png)
+
+[Mobile view with all five faces](previews/mobile-grid.png)
