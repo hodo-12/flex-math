@@ -2,6 +2,7 @@ import * as T from '../three.module.js';
 import {TRACK,TRACK_LENGTH,trackPoint} from './race.js';
 import {createVehicle} from './vehicles.js';
 import {createDriver} from './driver.js';
+import {createPortraitCanvas} from './portrait.js';
 
 export async function createKartScene(container,configs){
   const renderer=new T.WebGLRenderer({antialias:true,alpha:false});
@@ -75,8 +76,7 @@ export async function createKartScene(container,configs){
       const original=await loader.loadAsync(new URL(c.face,import.meta.url).href);original.colorSpace=T.SRGBColorSpace;
       if(!c.faceWindow)return original;
       // Runtime display clipping only. No generated face or altered source file.
-      const w=c.faceWindow,canvas=document.createElement('canvas');canvas.width=w.width;canvas.height=w.height;const g=canvas.getContext('2d');
-      g.beginPath();g.ellipse(w.width/2,w.height/2,w.width*.49,w.height*.50,0,0,Math.PI*2);g.clip();g.drawImage(original.image,w.x,w.y,w.width,w.height,0,0,w.width,w.height);
+      const canvas=createPortraitCanvas(original.image,c.faceWindow);
       original.dispose();const display=new T.CanvasTexture(canvas);display.colorSpace=T.SRGBColorSpace;return display;
     }));
     drivers=configs.map((config,i)=>{
