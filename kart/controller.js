@@ -21,6 +21,7 @@ function paint(force=false){
   $('reset').disabled=!ready;$('pause').disabled=!active;$('pause').textContent=race.paused?'계속 달리기':'일시 정지';
   $('boost').disabled=!ready||race.phase!=='racing'||race.paused||picked.finished||picked.boostReady>0;
   $('boostState').textContent=picked.finished?'완주!':race.phase!=='racing'?'출발 후 사용':picked.boostReady>0?`${Math.ceil(picked.boostReady)}초 후 충전`:chosen.name+'에게!';
+  $('mobileControls').hidden=!active;$('mobileBoost').disabled=$('boost').disabled;$('mobileBoostState').textContent=$('boostState').textContent;$('mobilePause').textContent=$('pause').textContent;
   for(const b of $('racers').children)b.disabled=active;
   $('phaseLabel').textContent=race.paused?'잠시 쉬는 중':{ready:'출발 준비',countdown:'카운트다운',racing:'레이스 중',finished:'FINISH'}[race.phase];
   $('boardTitle').textContent=race.phase==='finished'?'오늘의 최종 순위':race.phase==='ready'?'오늘의 출전 명단':'지금 앞서가는 친구';
@@ -38,6 +39,7 @@ function paint(force=false){
 function reset(){race.reset(crypto.getRandomValues(new Uint32Array(1))[0]);ended=false;lastEvent=0;lastOrder='';$('result').hidden=true;$('liveNote').textContent='친구를 고르고 함께 출발해 봐!';last=performance.now();paint(true);}
 $('start').onclick=()=>{if(!ready||!['ready','finished'].includes(race.phase))return;if(race.phase==='finished')reset();race.start();paint(true);announcement(`${RACERS.length}명의 공주가 함께 출발합니다.`);if(matchMedia('(max-width:760px)').matches)document.querySelector('.arena').scrollIntoView({behavior:stage.motion?'smooth':'instant',block:'start'});};
 $('boost').onclick=()=>{if(race.boost(selected)){announcement(`${RACERS.find(c=>c.id===selected).name} 부스터!`);paint(true);}};
+$('mobileBoost').onclick=()=>$('boost').click();$('mobilePause').onclick=()=>$('pause').click();
 $('pause').onclick=()=>{race.togglePause();paint(true);};$('reset').onclick=reset;
 function motionUI(){$('motion').textContent=stage.motion?'효과 켜짐':'효과 꺼짐';$('motion').setAttribute('aria-pressed',String(stage.motion));}
 $('motion').onclick=()=>{stage.setMotion(!stage.motion);motionUI();};
@@ -49,7 +51,7 @@ function visibility(){last=performance.now();}
 document.addEventListener('visibilitychange',visibility);
 function render(now){if(disposed)return;const dt=Math.min(Math.max((now-last)/1000,0),.5);last=now;if(!document.hidden){if(!race.paused)visualTime+=dt;race.advance(dt);stage.draw(race,visualTime,dt);paint();}frame=requestAnimationFrame(render);}
 selectUI();paint(true);$('motion').disabled=true;$('camera').disabled=true;
-try{stage=await createKartScene($('stage'),RACERS);stage.setSelected(selected);ready=true;$('loadStatus').hidden=true;$('motion').disabled=false;$('camera').disabled=false;motionUI();paint(true);last=performance.now();frame=requestAnimationFrame(render);}
+try{stage=await createKartScene($('stage'),RACERS);stage.setSelected(selected);ready=true;$('loadStatus').hidden=true;$('motion').disabled=false;$('camera').disabled=false;$('camera').textContent=stage.close?'전체 보기':'친구 가까이';$('camera').setAttribute('aria-pressed',String(stage.close));motionUI();paint(true);last=performance.now();frame=requestAnimationFrame(render);}
 catch(error){$('loadStatus').textContent='3D 카트를 불러오지 못했어요. WebGL 지원 브라우저에서 새로고침해 줘.';console.error(error);}
 window.addEventListener('pagehide',()=>{disposed=true;cancelAnimationFrame(frame);document.removeEventListener('keydown',keyboard);document.removeEventListener('visibilitychange',visibility);stage?.dispose();music.dispose();},{once:true});
 window.addEventListener('pageshow',e=>{if(e.persisted)location.reload();});

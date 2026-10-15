@@ -90,12 +90,11 @@ export async function createKartScene(container,configs){
   const confetti=new T.InstancedMesh(new T.PlaneGeometry(.09,.18),material(0xffffff,{side:T.DoubleSide}),90);confetti.visible=false;scene.add(confetti);
   const matrix=new T.Matrix4(),color=new T.Color(),projected=new T.Vector3(),target=new T.Vector3(),cameraTarget=new T.Vector3();
   for(let i=0;i<90;i++)confetti.setColorAt(i,color.set(configs[i%configs.length].color));
-  let aspect=1,close=false,motion=!matchMedia('(prefers-reduced-motion: reduce)').matches,selected=configs[0].id;
+  let aspect=1,firstDraw=true,close=matchMedia('(max-width:760px)').matches,motion=!matchMedia('(prefers-reduced-motion: reduce)').matches,selected=configs[0].id;
   function resize(){const w=container.clientWidth,h=container.clientHeight;aspect=w/h;renderer.setSize(w,h,false);}
   observer=new ResizeObserver(resize);observer.observe(container);resize();
   function draw(race,time,dt){
     if(disposed)return;
-    const chosen=race.racers.find(r=>r.id===selected)||race.racers[0];
     const result=race.phase==='finished';
     for(let i=0;i<drivers.length;i++){
       const d=drivers[i],state=race.racers[i],winner=state.rank===1;
@@ -105,15 +104,16 @@ export async function createKartScene(container,configs){
       d.vehicle.root.position.set(p.x,.045,p.z);d.vehicle.root.rotation.y=p.yaw;
       d.vehicle.animate(state,time,motion);d.driver.pose(state,{time,motion,winner,finished:state.finished});
     }
-    if(close&&!result){const p=trackPoint(chosen.distance,chosen.lane);target.set(p.x,.7,p.z);}
+    if(close&&!result){target.set(0,.7,0);for(const d of drivers){target.x+=d.vehicle.root.position.x/drivers.length;target.z+=d.vehicle.root.position.z/drivers.length;}}
     else target.set(0,result?.65:0,result?3.6:0);
-    cameraTarget.lerp(target,1-Math.exp(-Math.max(dt,.016)*5));
-    const halfHeight=result?3.6:close?3.5:aspect<1.1?10.8:8.3;
-    // Portrait devices look along the long axis so the complete circuit fits.
-    const halfWidth=Math.max(halfHeight*aspect,result?drivers.length*1.17:close?3.6:aspect<1.1?7.8:12);
+    if(firstDraw){cameraTarget.copy(target);firstDraw=false;}else cameraTarget.lerp(target,1-Math.exp(-Math.max(dt,.016)*5));
+    const halfHeight=result?3.6:close?3.5:8.3;
+    let halfWidth=Math.max(halfHeight*aspect,result?drivers.length*1.17:close?3.6:12);
+    camera.position.copy(cameraTarget).add(result?new T.Vector3(0,5,12):close?new T.Vector3(2,6,10):new T.Vector3(0,24,27));camera.lookAt(cameraTarget);camera.updateMatrixWorld();
+    // Close view frames the whole pack, including the last racer. Portrait
+    // screens start here so the original faces are readable without stacking.
+    if(close&&!result)for(const d of drivers){projected.copy(d.vehicle.root.position).add(new T.Vector3(0,1,0)).applyMatrix4(camera.matrixWorldInverse);halfWidth=Math.max(halfWidth,Math.abs(projected.x)+1,(Math.abs(projected.y)+1.25)*aspect);}
     camera.left=-halfWidth;camera.right=halfWidth;camera.top=halfWidth/aspect;camera.bottom=-halfWidth/aspect;camera.updateProjectionMatrix();
-    camera.position.copy(cameraTarget).add(result?new T.Vector3(0,5,12):close?new T.Vector3(2,6,10):aspect<1.1?new T.Vector3(23,25,2):new T.Vector3(0,24,27));camera.lookAt(cameraTarget);
-    camera.updateMatrixWorld();
     const latest=race.events.at(-1);
     for(const d of drivers){
       const r=race.racers.find(r=>r.id===d.config.id);

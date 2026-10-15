@@ -14,8 +14,9 @@ AI racers also have bursts of speed. The winner is decided by crossing time,
 not by the selected character or a scripted result. A round takes about
 40 seconds including the countdown.
 
-Use **친구 가까이** to follow the chosen friend, **전체 보기** for the whole
-circuit, and **일시 정지** / **다시 준비** as needed. Music is opt-in; the
+Use **친구 가까이** to follow the whole pack, **전체 보기** for the whole
+circuit, and **일시 정지** / **다시 준비** as needed. Mobile starts in pack view
+and shows a fixed boost/pause bar while racing. Music is opt-in; the
 existing original BONUS beat is reused read-only. Reduced motion disables
 extra wobble, cloth flutter, confetti and cheer hops, while the essential
 race movement remains. This is a local five-character AI mini-game, not
