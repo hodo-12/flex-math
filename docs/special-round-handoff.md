@@ -69,3 +69,16 @@ resources. No API keys, remote assets or new runtime dependencies are needed.
 Run `npm test` for 31 Node checks. The existing GitHub Actions workflow runs
 `node special/browser-smoke.mjs` and the unchanged main-game Chrome suite.
 Screenshots are saved to the workflow's `game-test-screenshots` artifact.
+
+Verified code: `6d65327661182faec892cd9c905e017b6de32efc`.
+[Chrome/WebGL CI run](https://github.com/hodo-12/flex-math/actions/runs/38688157591)
+passed on 2026-10-15: all 31 Node checks, SPECIAL ROUND interactions including
+mobile automatic arena scrolling, and the unchanged main-game browser suite
+(level 3 wrong/correct/completion, level 1/2 entry, atlas and quiz).
+
+Actual browser screenshots, not mockups:
+
+- [Opponent counterpunch](special-combat-preview/rival-counter.png)
+- [Player's decisive contact](special-combat-preview/finishing-hit.png)
+- [Homeomorphic choice: victory](special-combat-preview/win.png)
+- [Non-homeomorphic choice: mobile defeat](special-combat-preview/mobile-loss.png)
