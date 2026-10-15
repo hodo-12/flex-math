@@ -1,3 +1,4 @@
+import {createPrincessDress,DRESS_STYLES} from './character-dress.js';
 /**
  * Procedural 3D explorer rig. All geometry belongs to one moving root.
  * The face stays as the user's ORIGINAL texture on a camera-facing head rig.
@@ -72,7 +73,7 @@ export function createCharacterRig(T, scene) {
     const cap=orb(shoulder,.107,cloth,side*.012,-.045,0);cap.scale.set(.94,1.13,.96);
     const sleeve=garment(shoulder,[[0,.015],[.12,0],[.125,-.08],[.103,-.28],[.10,-.34],[0,-.35]],cloth,.93);
     const elbow=new T.Group();elbow.position.set(0,-.34,0);shoulder.add(elbow);
-    const elbowCover=orb(elbow,.084,cloth);elbowCover.scale.set(.92,1.1,.86);
+    const elbowCover=orb(elbow,.084,cloth);elbowCover.scale.set(.92,1.1,.86);elbowCover.name='elbow-cover';
     const forearm=garment(elbow,[[.10,.025],[.105,-.04],[.085,-.23],[.077,-.30]],cloth,.95);
     const cuff=add(elbow,new T.CylinderGeometry(.082,.077,.065,20),seams,[0,-.285,0]);
     const glove=orb(elbow,.085,skin,0,-.38,.012);glove.scale.set(.78,1.25,.64);
@@ -103,6 +104,10 @@ export function createCharacterRig(T, scene) {
     alphaTest:.045,depthWrite:false,depthTest:false,toneMapped:false}));
   face.name='original-face-photo';face.scale.set(.78,.78,1);
   face.renderOrder=15;head.add(face);
+  const princessDress=createPrincessDress(T,{coat,arms,legs});
+  // Replace only the outer costume. Keep original limbs, body and photo hierarchy.
+  [waist,torso,hem,tee,zipper,pull,collar,hood,pocketL,pocketR,backpack,strapL,strapR,
+    ...pocketSeams,...cords].forEach(part=>part.visible=false);
   const themes={
     hood:{jacket:0x576e5b,seam:0xb5c8af,shirt:0xefece2,pants:0x35433e,shoe:0xe4e7e0,skin:0xd7af95,hood:true,pack:true},
     smile:{jacket:0x354950,seam:0xd9a46f,shirt:0xeae0d0,pants:0x283740,shoe:0xe1dcd6,skin:0xd5a68b,hood:false,pack:true},
@@ -118,35 +123,29 @@ export function createCharacterRig(T, scene) {
   const profiles={hood:[1,1,1],smile:[1.08,1.04,1.02],cat:[1.04,.96,.97],cap:[.94,1.08,1.04]};
   const setCharacter=(id, texture)=>{
     const style=themes[id]||themes.hood;
-    cloth.color.setHex(style.jacket);
-    seams.color.setHex(style.seam);
-    inner.color.setHex(style.shirt);
-    trousers.color.setHex(style.pants);
-    shoes.color.setHex(style.shoe);
+    const dressStyle=DRESS_STYLES[id]||DRESS_STYLES.hood;
+    cloth.color.setHex(dressStyle.color);
+    seams.color.setHex(dressStyle.trim);
+    inner.color.setHex(dressStyle.trim);
+    trousers.color.setHex(0xfff1e5); // stockings under the hem
+    shoes.color.setHex(dressStyle.shoe);
     skin.color.setHex(style.skin);
-    rubber.color.setHex(0x32444b);
-    hood.visible=style.hood;
-    backpack.visible=style.pack;strapL.visible=style.pack;strapR.visible=style.pack;
+    rubber.color.setHex(0x795d63);
+    princessDress.setStyle(id);
     [bodyWidth,legLength,bodyHeight]=profiles[id]||profiles.hood;
     coat.scale.set(bodyWidth,bodyHeight,1);waist.scale.x=bodyWidth;
     for(const leg of legs){leg.hip.position.x=leg.side*.145*bodyWidth;leg.hip.scale.setScalar(legLength);}
-    // Distinct silhouettes, not just a palette swap.
-    torso.scale.set(id==='cat'?1.06:1,id==='cap'?1.04:1,id==='smile'?1.09:1);
-    hem.scale.y=id==='smile'?1.5:1;
-    collar.visible=!style.hood;tee.visible=id==='hood'||id==='smile';
-    zipper.visible=id!=='cat';pull.visible=id!=='cat';
-    cords.forEach(c=>c.visible=style.hood);
-    pocketL.scale.x=pocketR.scale.x=id==='cat'?1.18:1;
     if(texture){face.material.map=texture;face.material.needsUpdate=true;}
     seeded=false;
   };
   const reset=()=>{
     gait=.60;blend=0;jumpClock=0;wasCelebrating=false;seeded=false;stopClock=0;wasMoving=false;
+    princessDress.reset();
     root.position.y=.02;root.rotation.set(0,0,0);
     coat.rotation.set(0,0,0);pelvis.rotation.set(0,0,0);
     pelvis.position.set(0,.035+.86*legLength+.095,0);
     coat.position.set(0,.25,0);head.rotation.set(0,0,0);
-    for(const a of arms){a.shoulder.rotation.set(0,0,a.side*.10);a.elbow.rotation.set(-.16,0,0);}
+    for(const a of arms){a.shoulder.rotation.set(0,0,a.side*.22);a.elbow.rotation.set(-.16,0,0);}
     for(const l of legs){l.hip.rotation.set(0,0,0);l.knee.rotation.set(0,0,0);l.foot.rotation.set(0,0,0);l.planted=true;}
   };
   const footRest=(leg,out)=>{
@@ -209,7 +208,7 @@ export function createCharacterRig(T, scene) {
       const a=arms[i],phase=Math.sin((gait+i*.5)*Math.PI*2);
       const cheer=celebrating?smoothstep(clamp(jumpClock/.22,0,1)):0;
       a.shoulder.rotation.x=smooth(a.shoulder.rotation.x,-phase*blend*.38-cheer*.35,ease(t,13));
-      a.shoulder.rotation.z=smooth(a.shoulder.rotation.z,a.side*(.10+cheer*2.1),ease(t,12));
+      a.shoulder.rotation.z=smooth(a.shoulder.rotation.z,a.side*(.22+cheer*1.98),ease(t,12));
       a.elbow.rotation.x=smooth(a.elbow.rotation.x,-.18-Math.max(0,-phase)*blend*.27-cheer*.35,ease(t,12));
     }
     if(wasMoving&&!moving){stopClock=0;legs.forEach(l=>l.from.copy(l.anchor));}
@@ -254,8 +253,9 @@ export function createCharacterRig(T, scene) {
       head.rotation.y+=angleDiff(desired,head.rotation.y)*ease(t,9);
     }
     head.rotation.z=smooth(head.rotation.z,-step*blend*.012,ease(t,8));
+    princessDress.tick({dt:t,time,blend,turn,jump});
     root.updateMatrixWorld(true);
   };
   root.position.y=.02;
-  return {root,face,head,arms,legs,torso,setCharacter,reset,tick};
+  return {root,face,head,arms,legs,torso,princessDress,setCharacter,reset,tick};
 }

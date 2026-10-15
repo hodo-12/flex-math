@@ -18,9 +18,10 @@ page.on('pageerror',e=>errors.push(e.message));
 fs.mkdirSync('character-previews',{recursive:true});
 try{
   await page.goto('http://127.0.0.1:8080/tests/character-studio.html',{waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>window.studioReady,{timeout:45000});
+  await page.waitForFunction(()=>window.studioReady,null,{timeout:45000});
   const intact=()=>page.evaluate(()=>window.studio.rigs.every(r=>
-    r.face.visible && r.face.material.map?.image?.complete && r.face.parent===r.head
+    r.face.visible && r.face.material.map?.image?.complete && r.face.parent===r.head &&
+    Object.values(r.princessDress.skirts).filter(g=>g.visible).length===1
   ));
   assert(await intact(),'All four original photo textures must be loaded');
   for(const [name,pose] of [
@@ -36,6 +37,16 @@ try{
     await page.screenshot({path:'character-previews/'+name+'.png',animations:'disabled',timeout:25000});
     console.log('PREVIEW '+name+' OK');
   }
+  // Character cards keep all controls and original photos; only clothing changes.
+  await page.goto('http://127.0.0.1:8080/',{waitUntil:'domcontentloaded'});
+  assert.equal(await page.locator('.character').count(),4);
+  const labels=await page.locator('.outfit-chip').allTextContents();
+  assert.deepEqual(labels,['루비 리본 드레스','사파이어 레이스 드레스','햇살 꽃잎 드레스','로즈 프릴 드레스']);
+  await page.screenshot({path:'character-previews/selection.png'});
+  await page.setViewportSize({width:390,height:844});
+  await page.screenshot({path:'character-previews/selection-mobile.png',fullPage:true});
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'No mobile horizontal overflow');
+  await page.setViewportSize({width:1050,height:680});
   // Original game still loads the character, and movement starts when object clicked.
   await page.goto('http://127.0.0.1:8080/',{waitUntil:'domcontentloaded'});
   await page.locator('[data-character="cat"]').click();

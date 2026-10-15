@@ -34,3 +34,36 @@ test('frame stalls and reset never lose the face or jump pose',()=>{
  r.reset();r.tick({dt:1/60,time:0,moving:false,cameraPosition,celebrating:false});
  assert.equal(r.root.position.y,.02);assert.equal(r.face.scale.x,.78);
 });
+
+// Clothing regression checks use the real geometry, including maximum sway/jump.
+for(const [id,color] of Object.entries({hood:0xc82f4b,smile:0x4c82cf,cat:0xf1bd36,cap:0xe77da7})){
+ test(`${id}: dress selection, seam attachment, hem clearance and bounded cloth motion`,()=>{
+  const rig=createCharacterRig(T,new T.Scene()),photo=new T.Texture();rig.setCharacter(id,photo);rig.reset();
+  const dress=rig.princessDress,world=new T.Vector3();
+  assert.equal(dress.materials.satin.color.getHex(),color);
+  assert.equal(Object.values(dress.skirts).filter(g=>g.visible).length,1);
+  assert.equal(dress.bodice.parent,rig.head.parent);
+  let minHem=Infinity,maxMovement=0;
+  for(let frame=0;frame<300;frame++){
+   const moving=frame<150,turn=frame<70?0:Math.PI*.7,jumping=frame>=180&&frame<280;
+   if(moving){rig.root.position.x+=Math.sin(turn)*1.4/60;rig.root.position.z+=Math.cos(turn)*1.4/60;}
+   rig.tick({dt:1/60,time:frame/60,moving,targetAngle:turn,cameraPosition,celebrating:jumping});
+   assert.equal(rig.face.material.map,photo);
+   dress.skirts[id].traverse(m=>{
+    if(m.name!=='dress-cloth')return;
+    const p=m.geometry.attributes.position,b=m.userData.base;
+    for(let i=0;i<p.count;i+=8){
+     const x=p.getX(i),y=p.getY(i),z=p.getZ(i);
+     assert([x,y,z].every(Number.isFinite));
+     const movement=Math.hypot(x-b[i*3],y-b[i*3+1],z-b[i*3+2]);maxMovement=Math.max(maxMovement,movement);
+     if(Math.abs(b[i*3+1]+.17)<.00001)assert(movement<.00001,'Waist seam must stay fixed');
+     world.set(x,y,z).applyMatrix4(m.matrixWorld);minHem=Math.min(minHem,world.y);
+    }
+   });
+  }
+  assert(minHem>.025,`dress penetrates ground: ${minHem}`);
+  assert(maxMovement>.005&&maxMovement<.07,`bounded cloth motion: ${maxMovement}`);
+  rig.reset();rig.setCharacter('hood',photo);assert.equal(dress.style,'hood');
+  console.log(`${id}: hem min ${minHem.toFixed(3)}, fabric displacement max ${maxMovement.toFixed(3)}`);
+ });
+}
