@@ -16,7 +16,9 @@ test('lobby adds exactly one bonus entrance to the previously deployed page',()=
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const link='<a id="bonusEntry" class="library-entry" href="bonus/index.html">♫ BONUS ROUND · 위상동형 비보잉 배틀 ↗</a>';
   assert.equal(html.split(link).length,2);
-  assert.equal(gitHash(Buffer.from(html.replace(link,''))),'c344aad6d4d9fc84abcff6fb7f679ef0aba83d2f');
+  const kart='<a id="kartEntry" class="library-entry" href="kart/index.html">♛ PRINCESS KART · 공주 카트라이더 ↗</a>';
+  assert.equal(html.split(kart).length,2);
+  assert.equal(gitHash(Buffer.from(html.replace(link,'').replace(kart,''))),'c344aad6d4d9fc84abcff6fb7f679ef0aba83d2f');
 });
 test('every offered choice drives the matching dance winner and one score',()=>{
   for(let index=0;index<rounds.length;index++)for(const id of rounds[index].options){

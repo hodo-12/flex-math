@@ -22,6 +22,7 @@ jobs:
           npm test
           node --test character-rig.test.js
           node --test bonus/bonus.test.js
+          node --test kart/kart.test.js
       - name: Install browser test driver
         run: npm install --no-save --no-package-lock playwright-core@1.56.0
       - name: Install Korean fonts for readable browser screenshots
@@ -35,6 +36,8 @@ jobs:
             curl --fail --silent http://127.0.0.1:8080/ > /dev/null && break
             sleep 1
           done
+      - name: Test PRINCESS KART in Chrome
+        run: node kart/browser-smoke.mjs
       - name: Test BONUS ROUND in Chrome
         run: node bonus/browser-smoke.mjs
       - name: Test SPECIAL ROUND in Chrome
@@ -56,6 +59,7 @@ jobs:
             character-previews/
             special-previews/
             bonus-previews/
+            kart-previews/
             avatar-hood-idle.png
             avatar-cat-walk.png
             avatar-cap-idle.png
