@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test mission.test.js",
-    "start": "python3 -m http.server 8080"
+    "test": "node --test mission.test.js character-rig.test.js special/rules.test.js special/integration.test.js",
+    "start": "python3 -m http.server 8080",
+    "test:special:browser": "node special/browser-smoke.mjs"
   }
 }

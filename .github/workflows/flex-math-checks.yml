@@ -30,6 +30,8 @@ jobs:
             curl --fail --silent http://127.0.0.1:8080/ > /dev/null && break
             sleep 1
           done
+      - name: Test SPECIAL ROUND in Chrome
+        run: node special/browser-smoke.mjs
       - name: Test game in Chrome
         run: node browser-smoke.mjs
       - name: Capture character preview (development branch only)
@@ -45,6 +47,7 @@ jobs:
             level3-complete.png
             level3-guide.png
             character-previews/
+            special-previews/
             avatar-hood-idle.png
             avatar-cat-walk.png
             avatar-cap-idle.png
