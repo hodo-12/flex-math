@@ -17,11 +17,13 @@ test('existing levels, learning, characters and styles retain baseline bytes',()
   };
   for(const [file,sha] of Object.entries(expected))assert.equal(gitHash(readFileSync(new URL('../'+file,import.meta.url))),sha,file);
 });
-test('lobby differs only by one independent SPECIAL link',()=>{
+test('lobby differs only by independent SPECIAL and BONUS entry links',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const link='<a id="specialEntry" class="library-entry" href="special/index.html">✦ SPECIAL ROUND · 위상동형 격투기장 ↗</a>';
   assert.equal(html.split(link).length,2);
-  assert.equal(gitHash(Buffer.from(html.replace(link,''))),'2a204e9d7fd6570182eae80e07b996bbb10531bb');
+  const bonus='<a id="bonusEntry" class="library-entry" href="bonus/index.html">♫ BONUS ROUND · 위상동형 비보잉 배틀 ↗</a>';
+  assert.equal(html.split(bonus).length,2);
+  assert.equal(gitHash(Buffer.from(html.replace(link,'').replace(bonus,''))),'2a204e9d7fd6570182eae80e07b996bbb10531bb');
 });
 test('both uploaded PNGs retain their original bytes and explicit first/third mapping',()=>{
   assert.equal(gitHash(readFileSync(new URL('./assets/first-face.png',import.meta.url))),'672b28864e4d0d53ad178c2124907635d14b5b70');
