@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SPECIAL ROUND · FLEX MATH</title><link rel="stylesheet" href="special.css"></head>
+<body><header><a href="../index.html">← 기존 1~3단계로</a><span>FLEX MATH / SPECIAL ROUND</span><button id="motion" aria-pressed="true">카메라 모션 켜짐</button></header>
+<main><section class="intro"><p class="eyebrow">THE TOPOLOGY ARENA</p><h1>모양은 달라도,<br><em>판정은 정확하게.</em></h1><p>빨강 공주와 노랑 공주의 위상동형 매치.<br>모형을 들고, 관찰하고, 같은 구조인지 판단하세요.</p></section>
+<section class="arena" aria-label="3D 위상동형 경기장"><div id="stage"></div><div class="stage-top"><b id="roundLabel">ROUND 01 / 04</b><span id="score">빨강 0 : 0 노랑</span></div><div class="stage-bottom"><span>비접촉 매치 · 가드 자세와 승리 세리머니</span><button id="view">시점 바꾸기</button></div><p id="loadStatus" role="status">경기장을 준비하고 있어요…</p></section>
+<section class="console"><div class="target"><span class="eyebrow">REFERENCE / 기준 모형</span><h2 id="target"></h2><p>표면은 내부를 채운 입체가 아닌 경계면을, 곡선은 두께 없는 선만 비교해요.</p></div>
+<div class="players" id="players"></div><div class="actions"><button id="judge" class="primary" disabled>두 캐릭터 판정 확인 →</button><button id="next" hidden>다음 라운드 →</button><button id="restart">처음부터 ↻</button></div><div id="result" role="status" aria-live="polite">각 캐릭터의 모형과 판정을 모두 선택하세요. 두 명을 직접 조작하는 함께하기 모드예요.</div></section>
+<details><summary>경기 규칙과 수학</summary><p>정답 판정을 한 캐릭터만 해당 라운드에서 승리하고 1점을 얻어요. 둘 다 맞으면 공동 승리, 둘 다 틀리면 승자 없이 다음 라운드로 진행해요. 마지막에 최고 점수 캐릭터가 우승해요. 모두 0점이면 우승자가 없어요.</p><p>표면: 연결된 닫힌 가향 표면에서 종수 0(구면)과 종수 1(토러스)을 비교해요. 곡선: 원·타원은 끝점이 없고, 선분·휘어진 선분은 끝점이 2개예요. 표면과 곡선은 차원이 달라 위상동형이 아니에요. 곡선의 화면상 두께와 끝점 표식은 비교 대상에 포함하지 않아요.</p></details>
+</main><script type="module" src="controller.js"></script></body></html>
