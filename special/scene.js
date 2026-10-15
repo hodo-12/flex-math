@@ -103,6 +103,10 @@ export async function createArena(container,{onFrame=()=>{},onFinish=()=>{}}={})
         arm.elbow.rotation.set(-1.42+strike*1.34+p.defeat*.9,0,0);
       });
     }
+    if(p.cheer>=.2&&!motion){
+      // Reduced motion retains a readable victory pose without repeated jumping.
+      for(const arm of rig.arms){arm.shoulder.rotation.set(-.35,0,arm.side*2.2);arm.elbow.rotation.set(-.5,0,0);}
+    }
     // Original face and clothing remain in the same hierarchy during every pose.
     rig.root.updateMatrixWorld(true);
     rig.arms[0].elbow.localToWorld(rig.held.position.set(0,-.41,.17));

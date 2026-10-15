@@ -1,69 +1,71 @@
-# SPECIAL ROUND — Astra 인계 메모
+# SPECIAL ROUND — topology combat
 
-개발 브랜치: `feature/special-topology-arena-no-deploy`.
-기준 main: `64060ffd945ee6453fbb8f61256845effdaa77a6` (공주 드레스 반영본).
-이 요청에서는 main 병합 및 GitHub Pages 배포를 하지 않습니다.
+The arena is an independent page at `/special/index.html`. The combat revision
+continues the existing SPECIAL ROUND and reuses the existing character rigs.
+Only files under `special/` affect runtime behavior. Levels 1–3, root UI,
+learning content, shared characters and all existing photo files are unchanged.
 
-## 실행과 파일 구조
+## Player flow and victory rule
 
-저장소 루트에서 정적 HTTP 서버를 실행한 후 `/special/index.html`을 여세요.
-기존 로비에는 독립 링크 하나만 추가했습니다. 1~3단계의 선택·실행 흐름은 그대로입니다.
+1. The opponent holds the round's reference model.
+2. Select one offered model. The player's left hand immediately holds it.
+3. Start the fight. Both fighters approach, exchange four punches and recoil.
+4. A **homeomorphic choice wins**. A non-homeomorphic choice **loses**. The
+   winner delivers the fifth, decisive strike; the loser staggers back.
+5. Read the explanation, then advance to the next reference. Four rounds record
+   wins and losses. Restart also works during a fight and cancels its result.
 
-- `special/rules.js`: 유한 모형 목록, 수학 판정, 라운드 상태, 득점·공동 승리·우승자.
-- `special/scene.js`: 독립 Three.js 장면, 팔각 경기장, 기존 리그의 빨강/노랑 드레스, 사진 텍스처, 손에 든 모형, 카메라와 세리머니.
-- `special/controller.js`: 2인 함께하기 조작, 입력 잠금, 라운드 진행, 재시작, 결과 설명.
-- `special/special.css`, `special/index.html`: 기존 CSS와 전역 상태를 공유하지 않는 반응형 화면.
-- `special/rules.test.js`: 전체 선택·참/거짓 조합, 중복 제출, 오류 입력, 공동 우승과 0점 처리.
-- `special/integration.test.js`: 기준 파일 바이트 보존, 로비 링크 외 변경 없음, 원본 사진 보존 검사.
-- `special/browser-smoke.mjs`: 실제 브라우저에서 정답·오답·공동 승리·최종 우승·0점·초기화·모바일·모션 설정·나가기 검사.
+There are no true/false claims, correct-rejection wins, shared round victories,
+second-player answers or timing-based outcomes. Health bars visualize the
+already determined result; extra clicks and animation speed cannot change it.
 
-`npm test`로 29개 Node 검사를 실행합니다. 브라우저 검사는 `npm run test:special:browser`입니다.
-`playwright-core` 설치가 필요하고, 기본 Linux Chrome 경로 외에는 `BROWSER_PATH`를 지정하세요.
-브라우저 패키지 경로는 선택적으로 `PLAYWRIGHT_MODULE`로 지정할 수 있습니다.
-브라우저 검사는 임시 로컬 서버를 직접 시작·종료하고 `special-previews/`에 스크린샷을 남깁니다.
-기존 PR 검사 워크플로에 새 브라우저 검사를 추가했고, 배포 작업은 추가하지 않았습니다.
+## Files
 
-## 사진 매핑 (사용자의 이번 요청 순서 그대로)
+- `rules.js`: existing finite catalogue and homeomorphism classification;
+  select → fighting → result → complete state, exactly-once scoring.
+- `combat.js`: deterministic approach, alternating strikes, recoil, charge,
+  decisive contact, defeat and celebration. Pure time sampling is testable.
+- `scene.js`: existing 3D rig plus arena-only gloves, poses, held models,
+  lighting, ring, impact rays and camera. Shared rig/dress sources are untouched.
+- `controller.js`: selection cards, locked combat input, health/results, round
+  progression and cancellation. No production test hooks or global game state.
+- `icons.js`, `index.html`, `special.css`: catalogue previews and responsive HUD.
+- `rules.test.js`, `integration.test.js`: exhaustive offered-choice outcomes,
+  state/timing regressions and byte preservation of the main game.
+- `browser-smoke.mjs`: actual Chrome/WebGL UI flows and reproducible contact
+  screenshots. It controls browser time for contact captures and separately
+  plays one mobile reduced-motion fight in real time.
 
-- 업로드 `image(4).png` → `special/assets/first-face.png` → 첫째 캐릭터/빨강 `hood` 드레스.
-- 업로드 `image(5).png` → `special/assets/third-face.png` → 셋째 캐릭터/노랑 `cat` 드레스.
+## Existing portraits
 
-이번 명시적 순서를 따르므로 기존 캐릭터 사진과의 조합과 다를 수 있습니다.
-두 PNG는 원본 바이트 그대로 저장했습니다. 얼굴을 생성하거나 보정하지 않았습니다.
-장면에서는 UV 표시 영역만 조정하여 얼굴을 보여 줍니다. 기존 네 사진은 교체하지 않았습니다.
-기존과 같은 정면 사진 스프라이트 방식이며, 뒤에서 보아도 카메라를 향합니다.
-별도의 홍보 이미지 파일은 이번 환경에 없으므로 정확한 복제를 주장하지 않습니다.
+The red fighter uses `hood.png`; the yellow fighter uses
+`avatar-cat-head.png`, matching the main game's existing characters. Neither
+texture is cropped or changed. All four original face files and the earlier
+`special/assets/` uploads remain intact. Faces remain attached to the same
+head/torso hierarchy and use the existing camera-facing photo convention.
 
-## 수학과 승리 규칙
+## Mathematical scope
 
-표면은 **내부를 채운 입체가 아니라 전체 경계면**입니다. 목록의 표면은 연결된 닫힌 가향 2차원 다양체만 사용하며, 이 범위에서 종수가 같은 경우만 위상동형입니다.
-구/알: 종수 0. 도넛/길쭉한 도넛: 종수 1.
-곡선은 **내부와 두께 없는 1차원 공간**입니다. 원/타원은 단순 닫힌 곡선, 선분/휘어진 선분은 양 끝점을 포함한 닫힌 구간입니다.
-얇은 튜브와 끝점 구슬은 가시화 수단이며 비교 대상의 두꺼운 표면이 아닙니다.
-표면과 곡선은 차원이 달라 위상동형이 아닙니다. 같은 실루엣이나 보이는 구멍 수만으로 판정하지 마세요.
-이 판정기는 이 명시적 목록만 다룹니다. 임의 메시, 비가향 표면, 경계 있는 표면, 매듭/교차 그래프를 추가할 때는 별도 분류가 필요합니다.
+This is a finite catalogue, not a general mesh classifier. Surfaces mean their
+whole boundary, not the filled solid. They are connected, closed, orientable
+2-manifolds: sphere/egg have genus 0; torus/elongated torus have genus 1.
+Curves have no interior or thickness: circle/ellipse are simple closed curves;
+segment/bent segment are compact intervals including both endpoints.
+Surfaces and curves differ in dimension and are not homeomorphic. The tube
+thickness and endpoint markers are visual aids, not part of the classified
+space. Do not classify arbitrary meshes by their silhouettes alone.
 
-각 캐릭터는 모형을 하나 선택한 뒤 '같은 구조/다른 구조'를 답합니다. **참인 관계를 참이라고 답하거나 거짓인 관계를 거짓이라고 답할 때만 정답**입니다.
-정답 캐릭터만 라운드 승리와 1점을 얻습니다. 두 정답은 공동 승리, 두 오답은 승자 없음입니다.
-4라운드 후 최고 점수가 양수인 캐릭터가 우승합니다. 동점은 공동 우승, 모두 0점이면 우승자 없음입니다.
-모형만 들었다고 자동 승리하지 않고, 오답에는 점수나 승리 애니메이션을 주지 않습니다.
+## Motion and lifecycle
 
-## 연출과 확장 지점
+Optional camera drift, hit shake and victory jumping default off under
+`prefers-reduced-motion`. The meaningful fight poses still play. There are no
+strobe effects. Hiding the tab pauses fight time; returning resumes it. Restart
+clears the current animation mode and cannot award a stale point. Page exit
+cancels animation, disconnects resize/visibility listeners and releases WebGL
+resources. No API keys, remote assets or new runtime dependencies are needed.
 
-현재는 2명을 직접 조작하는 함께하기 모드입니다. AI 상대나 타이머는 없습니다.
-비접촉 가드 자세, 모형 제시, 정답 시 기존 리그의 환호·점프를 사용합니다. 타격·피격·상처 연출은 없습니다.
-카메라는 약한 궤도 이동과 승리 시 근접 시점을 사용하며 버튼으로 모션과 시점을 바꿀 수 있습니다.
-`prefers-reduced-motion`이면 카메라 자동 이동과 점프를 기본으로 끕니다.
-손의 비균일 스케일을 상쇄하고 모형을 카메라 방향으로 보여 원과 토러스 구멍을 구분하기 쉽게 했습니다.
-사실적 천 시뮬레이션이나 영상 내보내기는 포함하지 않습니다.
+## Validation
 
-Astra는 `scene.js`에서 경기장·조명·비접촉 인사/모형 제시 동작을 발전시키고,
-`rules.js`의 정답 계약과 `app.js`/`state.js`/`learning.js` 보존을 유지하면 됩니다.
-검증용 기준 바이트 검사는 기존 파일을 의도적으로 바꿀 때만 근거와 함께 갱신하세요.
-
-## 이번 검증
-
-- 기존 미션 8개, 리그/드레스 9개, SPECIAL 규칙 9개, 보존 검사 3개: 총 29개 통과.
-- Windows Edge(Chromium), 소프트웨어 WebGL에서 실제 화면 조작 검사 통과.
-- 데스크톱 1280px/모바일 390px 스크린샷 육안 검토.
-- 기존 1~3단계 브라우저 전체 플레이는 로컬에서 재실행하지 않았습니다. 기존 코드는 바이트 동일성을 검증했고, 기존 Chrome 회귀 스위트는 PR CI에서 계속 실행됩니다.
+Run `npm test` for 31 Node checks. The existing GitHub Actions workflow runs
+`node special/browser-smoke.mjs` and the unchanged main-game Chrome suite.
+Screenshots are saved to the workflow's `game-test-screenshots` artifact.

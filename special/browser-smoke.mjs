@@ -43,7 +43,7 @@ try{
   assert.match(await page.locator('#resultTitle').innerText(),/승리/);
   assert.match(await page.locator('#score').innerText(),/1승 · 0패/);
   assert.equal(await page.locator('[aria-label="상대 체력"]').getAttribute('aria-valuenow'),'0');
-  await capture('win');
+  await page.clock.runFor(400);await capture('win');
   // Repeat clicks cannot score twice, and a different object now always loses.
   await page.locator('#fight').evaluate(button=>button.click());
   assert.match(await page.locator('#score').innerText(),/1승 · 0패/);

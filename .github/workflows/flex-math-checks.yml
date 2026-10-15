@@ -23,6 +23,10 @@ jobs:
           node --test character-rig.test.js
       - name: Install browser test driver
         run: npm install --no-save --no-package-lock playwright-core@1.56.0
+      - name: Install Korean fonts for readable browser screenshots
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y fonts-noto-cjk
       - name: Start local game server
         run: |
           python3 -m http.server 8080 > /tmp/flex-math-game.log 2>&1 &
