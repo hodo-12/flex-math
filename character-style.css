@@ -18,3 +18,22 @@
 .character[data-character="cap"] .outfit-chip{background:#eaf4f3;color:#3a6b76;border-color:#cfe2e2}
 @media(prefers-reduced-motion:reduce){.character,.character:hover{transition:none;transform:none}}
 @media(max-width:800px){.character .outfit-chip{font-size:9px;padding:4px 7px;white-space:normal}}
+
+/* Princess costumes: same cards, buttons, face sources and layout. */
+.character{--dress:#c82f4b;--dress-light:#f47383;--dress-trim:#f8d492;--dress-ink:#8b3043}
+.character[data-character="smile"]{--dress:#4c82cf;--dress-light:#b4d8f3;--dress-trim:#f3f2eb;--dress-ink:#345d94}
+.character[data-character="cat"]{--dress:#f1bd36;--dress-light:#ffdf78;--dress-trim:#fff2cc;--dress-ink:#7f601d}
+.character[data-character="cap"]{--dress:#e77da7;--dress-light:#f7b5cd;--dress-trim:#ffe9ee;--dress-ink:#944769}
+.character .portrait img{height:81px;margin-top:3px;max-width:100%;object-fit:contain}
+.character .portrait:before,.character .portrait:after{display:none}
+.character .portrait .shirt{z-index:1;bottom:-3px;width:92px;height:85px;border:0;border-radius:0;box-shadow:none;background:var(--dress);clip-path:polygon(32% 0,68% 0,80% 12%,76% 29%,67% 37%,83% 65%,100% 94%,96% 100%,4% 100%,0 94%,17% 65%,33% 37%,24% 29%,20% 12%)}
+.character .portrait .shirt:before{width:100%;height:57px;top:auto;bottom:0;left:0;transform:none;clip-path:none;opacity:1;border-radius:50% 50% 15% 15%;border-bottom:4px solid var(--dress-trim);background:repeating-linear-gradient(82deg,transparent 0 10px,#ffffff20 11px 13px,transparent 14px 22px),radial-gradient(ellipse at 50% 0,var(--dress-light) 0 45%,var(--dress) 47%)}
+.character .portrait .shirt:after{width:40px;height:5px;left:50%;top:28px;transform:translateX(-50%);border-radius:50%;background:var(--dress-trim);opacity:1;box-shadow:0 2px 4px #6e355a22}
+.character[data-character="hood"] .portrait .shirt:before{background:linear-gradient(75deg,transparent 44%,var(--dress-trim) 45% 47%,var(--dress-light) 48% 52%,var(--dress-trim) 53% 55%,transparent 56%),linear-gradient(105deg,var(--dress) 0 35%,var(--dress-light) 36% 65%,var(--dress) 66%)}
+.character[data-character="smile"] .portrait .shirt:before{background:radial-gradient(ellipse at 50% 0,var(--dress-light) 0 55%,var(--dress-trim) 56% 60%,var(--dress) 61%);border-bottom-style:dotted}
+.character[data-character="cat"] .portrait .shirt:before{background:radial-gradient(ellipse at 28% 0,var(--dress-light) 0 48%,transparent 50%),radial-gradient(ellipse at 78% 0,var(--dress-light) 0 50%,var(--dress) 52%)}
+.character[data-character="cat"] .portrait .shirt:after{height:9px;background:radial-gradient(circle,var(--dress-trim) 0 3px,transparent 4px) 0 0/12px 9px}
+.character[data-character="cap"] .portrait .shirt:before{background:repeating-linear-gradient(0deg,var(--dress) 0 15px,var(--dress-trim) 16px 19px,var(--dress-light) 20px 32px);border-radius:50% 50% 25% 25%}
+.character[data-character] .outfit-chip{color:var(--dress-ink);background:#fff8ef;border-color:var(--dress-light);font-size:9px;padding:5px 6px;min-height:24px}
+.character[data-character] .outfit-chip:before{color:var(--dress)}
+@media(max-width:600px){.character .portrait img{height:62px}.character .portrait .shirt{height:67px;width:72px}.character .portrait .shirt:before{height:44px}.character .portrait .shirt:after{top:22px;width:29px}.character[data-character] .outfit-chip{font-size:7px;padding:4px 2px;gap:2px;min-height:28px}}
