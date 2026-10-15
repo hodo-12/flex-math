@@ -50,6 +50,8 @@ export function createPrincessDress(T, {coat, arms, legs}) {
     const band=add(arm.shoulder,new T.CylinderGeometry(.112,.099,.045,20),materials.trim,[0,-.225,0]);
     pipe(arm.shoulder,[[0,.015,.10],[0,-.085,.145],[0,-.20,.105]],materials.overlay,.009);
     arm.forearm.material=materials.glove;arm.cuff.material=materials.trim;
+    const cover=arm.elbow.getObjectByName('elbow-cover');if(cover)cover.material=materials.glove;
+    arm.elbow.children.filter(m=>m.geometry?.type==='TubeGeometry').forEach(m=>m.visible=false);
     // The small connecting portion of the upper arm is a matching glove.
     const upper=add(arm.shoulder,new T.CylinderGeometry(.078,.074,.14,16),materials.glove,[0,-.295,0]);
   }
@@ -72,7 +74,10 @@ export function createPrincessDress(T, {coat, arms, legs}) {
     for(let j=0;j<=rows;j++)for(let i=0;i<=cols;i++){
       const v=j/rows,a=start+i/cols*arc;
       const t=top+(bottom-top)*v;
-      const hemWave=scallop*Math.pow(v,4)*(1-Math.cos(a*6))*.5;
+      // Narrow edging follows the same entire scalloped hem, rather than
+      // starting flat and leaving crescent gaps above the trim.
+      const edgeBand=top>0&&(bottom-top)<.10;
+      const hemWave=scallop*(edgeBand?1:Math.pow(v,4))*(1-Math.cos(a*6))*.5;
       const y=waistY-length*t+hemWave;
       const fullness=.215+.365*Math.sin(t*Math.PI*.48);
       const pleat=Math.cos(a*12)*.016*Math.sin(t*Math.PI/2);

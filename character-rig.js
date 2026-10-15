@@ -73,7 +73,7 @@ export function createCharacterRig(T, scene) {
     const cap=orb(shoulder,.107,cloth,side*.012,-.045,0);cap.scale.set(.94,1.13,.96);
     const sleeve=garment(shoulder,[[0,.015],[.12,0],[.125,-.08],[.103,-.28],[.10,-.34],[0,-.35]],cloth,.93);
     const elbow=new T.Group();elbow.position.set(0,-.34,0);shoulder.add(elbow);
-    const elbowCover=orb(elbow,.084,cloth);elbowCover.scale.set(.92,1.1,.86);
+    const elbowCover=orb(elbow,.084,cloth);elbowCover.scale.set(.92,1.1,.86);elbowCover.name='elbow-cover';
     const forearm=garment(elbow,[[.10,.025],[.105,-.04],[.085,-.23],[.077,-.30]],cloth,.95);
     const cuff=add(elbow,new T.CylinderGeometry(.082,.077,.065,20),seams,[0,-.285,0]);
     const glove=orb(elbow,.085,skin,0,-.38,.012);glove.scale.set(.78,1.25,.64);
@@ -106,7 +106,7 @@ export function createCharacterRig(T, scene) {
   face.renderOrder=15;head.add(face);
   const princessDress=createPrincessDress(T,{coat,arms,legs});
   // Replace only the outer costume. Keep original limbs, body and photo hierarchy.
-  [torso,hem,tee,zipper,pull,collar,hood,pocketL,pocketR,backpack,strapL,strapR,
+  [waist,torso,hem,tee,zipper,pull,collar,hood,pocketL,pocketR,backpack,strapL,strapR,
     ...pocketSeams,...cords].forEach(part=>part.visible=false);
   const themes={
     hood:{jacket:0x576e5b,seam:0xb5c8af,shirt:0xefece2,pants:0x35433e,shoe:0xe4e7e0,skin:0xd7af95,hood:true,pack:true},
