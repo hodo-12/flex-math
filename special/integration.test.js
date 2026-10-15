@@ -27,3 +27,9 @@ test('both uploaded PNGs retain their original bytes and explicit first/third ma
   assert.equal(gitHash(readFileSync(new URL('./assets/first-face.png',import.meta.url))),'672b28864e4d0d53ad178c2124907635d14b5b70');
   assert.equal(gitHash(readFileSync(new URL('./assets/third-face.png',import.meta.url))),'ea0d3def2d93c29b5b10d2836a43e2bc3491badf');
 });
+
+test('arena reuses original portraits and shared rig, without UV recropping',()=>{
+  const scene=readFileSync(new URL('./scene.js',import.meta.url),'utf8');
+  assert.match(scene,/\.\.\/hood\.png/);assert.match(scene,/\.\.\/avatar-cat-head\.png/);
+  assert.doesNotMatch(scene,/texture\.(repeat|offset)\.set/);
+});

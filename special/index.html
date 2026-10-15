@@ -1,9 +1,34 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SPECIAL ROUND · FLEX MATH</title><link rel="stylesheet" href="special.css"></head>
-<body><header><a href="../index.html">← 기존 1~3단계로</a><span>FLEX MATH / SPECIAL ROUND</span><button id="motion" aria-pressed="true">카메라 모션 켜짐</button></header>
-<main><section class="intro"><p class="eyebrow">THE TOPOLOGY ARENA</p><h1>모양은 달라도,<br><em>판정은 정확하게.</em></h1><p>빨강 공주와 노랑 공주의 위상동형 매치.<br>모형을 들고, 관찰하고, 같은 구조인지 판단하세요.</p></section>
-<section class="arena" aria-label="3D 위상동형 경기장"><div id="stage"></div><div class="stage-top"><b id="roundLabel">ROUND 01 / 04</b><span id="score">빨강 0 : 0 노랑</span></div><div class="stage-bottom"><span>비접촉 매치 · 가드 자세와 승리 세리머니</span><button id="view">시점 바꾸기</button></div><p id="loadStatus" role="status">경기장을 준비하고 있어요…</p></section>
-<section class="console"><div class="target"><span class="eyebrow">REFERENCE / 기준 모형</span><h2 id="target"></h2><p>표면은 내부를 채운 입체가 아닌 경계면을, 곡선은 두께 없는 선만 비교해요.</p></div>
-<div class="players" id="players"></div><div class="actions"><button id="judge" class="primary" disabled>두 캐릭터 판정 확인 →</button><button id="next" hidden>다음 라운드 →</button><button id="restart">처음부터 ↻</button></div><div id="result" role="status" aria-live="polite">각 캐릭터의 모형과 판정을 모두 선택하세요. 두 명을 직접 조작하는 함께하기 모드예요.</div></section>
-<details><summary>경기 규칙과 수학</summary><p>정답 판정을 한 캐릭터만 해당 라운드에서 승리하고 1점을 얻어요. 둘 다 맞으면 공동 승리, 둘 다 틀리면 승자 없이 다음 라운드로 진행해요. 마지막에 최고 점수 캐릭터가 우승해요. 모두 0점이면 우승자가 없어요.</p><p>표면: 연결된 닫힌 가향 표면에서 종수 0(구면)과 종수 1(토러스)을 비교해요. 곡선: 원·타원은 끝점이 없고, 선분·휘어진 선분은 끝점이 2개예요. 표면과 곡선은 차원이 달라 위상동형이 아니에요. 곡선의 화면상 두께와 끝점 표식은 비교 대상에 포함하지 않아요.</p></details>
-</main><script type="module" src="controller.js"></script></body></html>
+<html lang="ko">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#10151f"><title>SPECIAL ROUND · FLEX MATH ARENA</title><link rel="stylesheet" href="special.css"></head>
+<body>
+<header><a class="brand" href="../index.html"><b>FLEX<span> MATH</span></b><small>← 1–3단계로 돌아가기</small></a><div class="header-right"><span class="live-dot"></span> SPECIAL ROUND <button id="motion" aria-pressed="true">효과 모션 켜짐</button></div></header>
+<main>
+  <section class="intro"><div><p class="eyebrow">CHOOSE YOUR SHAPE. WIN THE FIGHT.</p><h1>모양을 고르고, <em>승부를 걸어!</em></h1></div><p>위상동형인 물체를 들면 <strong>승리.</strong><br>다른 구조를 고르면 <strong>패배.</strong> 링에서 확인해 봐.</p></section>
+  <div class="game-layout">
+    <section class="arena" aria-label="두 캐릭터의 3D 격투 경기장">
+      <div id="stage"></div>
+      <div class="arena-hud">
+        <div class="fighter you"><div class="fighter-name"><img src="../hood.png" alt=""><div><small>YOU · 내 캐릭터</small><b>빨강 공주</b></div></div><div class="health" role="meter" aria-label="내 체력" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i id="hp0"></i></div></div>
+        <div class="round"><span id="roundLabel">ROUND 01</span><strong>VS</strong><small id="score">0승 · 0패</small></div>
+        <div class="fighter rival"><div class="fighter-name"><img src="../avatar-cat-head.png" alt=""><div><small>RIVAL · 상대</small><b>노랑 공주</b></div></div><div class="health" role="meter" aria-label="상대 체력" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i id="hp1"></i></div></div>
+      </div>
+      <div id="fightBanner" class="fight-banner" hidden><span id="bannerKicker">TOPOLOGY BATTLE</span><strong id="bannerText">FIGHT!</strong></div>
+      <div class="stage-bottom"><span id="fightStatus">모형을 선택하고 대결을 시작하세요</span><button id="view" aria-label="경기장 시점 바꾸기">시점 ↻</button></div>
+      <p id="loadStatus" role="status">경기장을 준비하고 있어요…</p>
+    </section>
+    <section class="console" aria-label="모형 선택과 대결">
+      <div class="panel-heading"><span class="eyebrow">01 / 기준을 살펴봐</span><span id="roundCount">1 / 4</span></div>
+      <div class="reference"><div id="targetIcon" class="shape-icon"></div><div><small>상대가 들고 있는 기준 모형</small><h2 id="target"></h2><span id="targetType" class="type-label"></span></div></div>
+      <div class="choice-heading"><span class="eyebrow">02 / 같은 구조의 물체를 골라</span><span>한 개 선택</span></div>
+      <div id="choices" class="choices" role="group" aria-label="내 캐릭터가 들 모형"></div>
+      <p id="selectionNote" class="selection-note">찢거나 붙이지 않고 기준 모형으로 바꿀 수 있을까?</p>
+      <button id="fight" class="primary" disabled><span>모형을 먼저 골라 줘</span><b>↗</b></button>
+      <button id="next" class="primary" hidden>다음 상대 모형 →</button>
+      <button id="restart" class="restart">처음부터 다시 ↻</button>
+    </section>
+  </div>
+  <section id="result" class="result" aria-live="polite" aria-atomic="true"><div class="result-mark" id="resultMark">?</div><div><span id="resultKicker" class="eyebrow">THE RULE IS SIMPLE</span><h2 id="resultTitle">위상동형이면 내가 이긴다!</h2><p id="resultExplanation">물체를 고르고 대결을 시작하면 두 캐릭터가 격투해요. 선택한 모형의 구조가 결정타의 주인을 정해요.</p></div></section>
+  <details><summary>알고 싸우면 더 재미있어 · 위상동형 규칙</summary><p>네 번의 대결마다 기준 모형이 바뀌어요. 선택한 모형이 위상동형이면 내 캐릭터가, 아니면 상대가 결정타를 넣어 이겨요. 별도의 ‘같다 / 다르다’ 답변이나 반사 신경 조작은 필요 없어요.</p><p>표면은 속을 채운 입체가 아닌 경계면이에요. 여기서는 연결된 닫힌 가향 표면의 종수(손잡이 수)를 비교해요. 구와 알은 종수 0, 도넛 표면은 종수 1이에요. 곡선은 내부와 두께가 없는 선이에요. 원과 타원은 끝점이 없고, 선분과 휘어진 선분은 끝점이 두 개예요. 2차원 표면과 1차원 곡선은 위상동형이 아니에요.</p><p class="quiet">표시되는 체력과 타격은 선택 결과를 보여 주는 격투 연출이에요. 연출 속도나 클릭 횟수는 승패를 바꾸지 않아요.</p></details>
+</main><script type="module" src="controller.js"></script>
+</body></html>
