@@ -28,7 +28,7 @@ function paintRound(){
       arena?.select(id);$('selectionNote').textContent=`내 캐릭터가 ‘${models[id].name}’을 들었어요.`;updateFight();
     };$('choices').append(button);
   });
-  $('fight').hidden=false;$('next').hidden=true;$('fightBanner').hidden=true;
+  $('fight').hidden=false;$('next').hidden=true;$('fightBanner').hidden=true;$('readResult').hidden=true;
   $('selectionNote').textContent='찢거나 붙이지 않고 기준 모형으로 바꿀 수 있을까?';
   $('fightStatus').textContent='모형을 선택하고 대결을 시작하세요';
   setResult('select','THE RULE IS SIMPLE','위상동형이면 내가 이긴다!','물체를 고르고 대결을 시작하면 두 캐릭터가 격투해요. 선택한 모형의 구조가 결정타의 주인을 정해요.');
@@ -45,7 +45,7 @@ function fightFrame(state){
 }
 function finishFight(){
   if(match.phase!=='fighting')return;
-  const result=match.finish();score();
+  const result=match.finish();score();$('readResult').hidden=false;
   setResult(result.won?'win':'lose',result.won?'VICTORY / 위상동형':'DEFEAT / 다른 구조',result.won?'내가 고른 모형으로 승리!':'다른 구조를 골라 패배했어요',`${models[result.target].name} ↔ ${models[result.selected].name}. ${explain(result.target,result.selected)}`);
   $('fight').hidden=true;$('next').hidden=false;$('next').textContent=match.index===rounds.length-1?'최종 전적 보기 →':'다음 상대 모형 →';
   // Do not move keyboard focus on a timer; announce the result through live text.
@@ -56,6 +56,7 @@ $('fight').onclick=()=>{
   $('choices').querySelectorAll('button').forEach(el=>el.disabled=true);$('fight').disabled=true;$('fight').firstElementChild.textContent='대결 중…';
   setResult('fighting','BATTLE IN PROGRESS','두 캐릭터가 맞붙었어!','공격과 방어 다음, 모형의 힘으로 승부가 결정돼요.');
   arena.fight(result);
+  if(matchMedia('(max-width:760px)').matches)document.querySelector('.arena').scrollIntoView({behavior:arena.motion?'smooth':'instant',block:'center'});
 };
 $('next').onclick=()=>{
   if(match.phase!=='result')return;
@@ -68,6 +69,7 @@ $('next').onclick=()=>{
 };
 $('restart').onclick=()=>{match=new Match();score();paintRound();$('choices').firstElementChild.focus();};
 $('view').onclick=()=>arena?.changeView();
+$('readResult').onclick=()=>$('result').scrollIntoView({behavior:arena?.motion?'smooth':'instant',block:'end'});
 function motionLabel(){const on=arena?.motion??false;$('motion').setAttribute('aria-pressed',String(on));$('motion').textContent=on?'효과 모션 켜짐':'효과 모션 꺼짐';}
 $('motion').onclick=()=>{if(arena){arena.setMotion(!arena.motion);motionLabel();}};
 paintRound();

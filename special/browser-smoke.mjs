@@ -72,7 +72,9 @@ try{
   await mobile.waitForFunction(()=>document.getElementById('loadStatus').hidden,{timeout:60000});
   assert.equal(await mobile.locator('#motion').getAttribute('aria-pressed'),'false');
   await mobile.locator('[data-model="circle"]').click();await mobile.locator('#fight').click();
+  assert.equal(await mobile.locator('.arena').evaluate(el=>{const r=el.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight;}),true,'Mobile fight scrolls the arena into view');
   await mobile.locator('#next').waitFor({state:'visible',timeout:30000});
+  assert.ok(await mobile.locator('#readResult').isVisible());
   assert.match(await mobile.locator('#resultTitle').innerText(),/패배/);
   assert.match(await mobile.locator('#resultExplanation').innerText(),/차원/);
   await mobile.screenshot({path:'special-previews/mobile-loss.png',fullPage:true});
