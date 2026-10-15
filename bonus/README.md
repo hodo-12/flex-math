@@ -35,3 +35,19 @@ The existing GitHub Actions workflow also executes `node bonus/browser-smoke.mjs
 with Chrome/WebGL and stores `bonus-previews/` in its screenshot artifact.
 The screenshot harness preserves WebGL's drawing buffer while its clock is
 paused; a separate mobile test uses normal rendering and real time.
+
+## Verified version and real browser previews
+
+Runtime commit: `e9a92925615b2ca85e193f3be9f7a097385df0f3`.
+[CI run 38696725418](https://github.com/hodo-12/flex-math/actions/runs/38696725418)
+passed on 2026-10-15: 31 existing Node checks, 7 bonus checks, the bonus
+Chrome/WebGL suite, unchanged SPECIAL ROUND browser suite, and the unchanged
+main-game browser suite (level 3 incorrect/correct/completion, levels 1/2 entry,
+atlas and quiz).
+
+Actual rendered screenshots:
+
+- [Red princess power spin](previews/power-spin.png)
+- [Yellow princess one-hand freeze](previews/yellow-freeze.png)
+- [Homeomorphic choice wins](previews/win.png)
+- [Other structure loses on mobile](previews/mobile-loss.png)
