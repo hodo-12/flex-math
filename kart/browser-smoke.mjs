@@ -17,6 +17,29 @@ try{
   await page.clock.pauseAt(await page.evaluate(()=>Date.now()+1000));await page.clock.runFor(32);
   assert.equal(await page.locator('.racer-card').count(),5);assert.equal(await page.locator('.kart-label').count(),5);assert.equal(await page.locator('.racer-card[aria-pressed="true"]').getAttribute('data-racer'),'clover');
   assert.equal(await page.locator('img').evaluateAll(images=>images.every(i=>i.complete&&i.naturalWidth>0)),true);assert.equal(await page.locator('#sound').getAttribute('aria-pressed'),'false');await capture('grid');
+  const cutout=await page.evaluate(async()=>{
+    const {RACERS}=await import('./racers.js'),{createPortraitCanvas}=await import('./portrait.js');
+    const config=RACERS.find(c=>c.id==='clover'),w=config.faceWindow;
+    const image=document.querySelector('.racer-card[data-racer="clover"] img');
+    const canvas=createPortraitCanvas(image,w),ctx=canvas.getContext('2d');
+    const source=document.createElement('canvas');source.width=w.width;source.height=w.height;source.getContext('2d').drawImage(image,-w.x,-w.y);
+    const a=ctx.getImageData(0,0,w.width,w.height).data,b=source.getContext('2d').getImageData(0,0,w.width,w.height).data;
+    let opaque=0,changed=0;for(let i=0;i<a.length;i+=4)if(a[i+3]===255){opaque++;if(a[i]!==b[i]||a[i+1]!==b[i+1]||a[i+2]!==b[i+2])changed++;}
+    const alpha=(x,y)=>ctx.getImageData(x-w.x,y-w.y,1,1).data[3];
+    return {opaque,changed,background:[[225,90],[810,90],[810,200],[220,700]].map(p=>alpha(...p)),face:[[491,410],[652,400],[574,502],[580,587],[570,700]].map(p=>alpha(...p)),masks:[...document.querySelectorAll('clipPath')].map(el=>el.id)};
+  });
+  assert.ok(cutout.opaque>220000);assert.equal(cutout.changed,0);assert.deepEqual(cutout.background,[0,0,0,0]);assert.deepEqual(cutout.face,[255,255,255,255,255]);assert.equal(new Set(cutout.masks).size,2);
+  console.log('PASS CLOVER CONTOUR: transparent backdrop, eyes/nose/mouth/chin retained, every opaque pixel identical to original, shared UI masks.');
+  // Capture the real display masks at review size; this temporary panel is test-only.
+  await page.evaluate(async()=>{
+    const {RACERS}=await import('./racers.js'),{createPortraitCanvas}=await import('./portrait.js');
+    const c=RACERS.find(c=>c.id==='clover'),image=document.querySelector('.racer-card[data-racer="clover"] img');
+    const panel=document.createElement('div');panel.id='face-review';panel.style.cssText='position:fixed;inset:20px auto auto 20px;z-index:1000;display:flex;gap:24px;padding:24px;background:#faf8ed;color:#283f43;font:700 17px sans-serif';
+    for(const [title,w] of [['수정 전 · 회색 여백', {...c.faceWindow,x:180,y:40,width:700,height:760,outline:null}],['수정 후 · 얼굴 윤곽',c.faceWindow]]){
+      const card=document.createElement('div');card.style.cssText='width:280px;text-align:center';const canvas=createPortraitCanvas(image,w);canvas.style.cssText='display:block;height:300px;width:auto;max-width:280px;margin:18px auto 0;background:#dceee9';card.append(document.createTextNode(title),canvas);panel.append(card);
+    }document.body.append(panel);
+  });
+  await page.locator('#face-review').screenshot({path:'kart-previews/face-contour.png'});await page.locator('#face-review').evaluate(el=>el.remove());
   await page.locator('#camera').click();await advance(1600);await capture('green-princess');await page.locator('#camera').click();await advance(1600);
   await page.locator('#start').click();assert.ok(await page.locator('#start').isDisabled());assert.equal(await page.locator('.racer-card:disabled').count(),5);await capture('countdown');
   await advance(4000);assert.equal(await page.locator('#phaseLabel').innerText(),'레이스 중');assert.ok(await page.locator('#boost').isEnabled());await page.locator('#boost').click();assert.ok(await page.locator('#boost').isDisabled());

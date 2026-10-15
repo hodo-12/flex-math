@@ -48,8 +48,11 @@ Four-, five- and six-racer configurations are covered by the simulation tests.
 The four existing PNGs are referenced directly and remain byte-identical.
 `assets/green-face.png` is the complete uploaded **976 × 1433** PNG, also
 byte-identical (Git blob SHA `9466d967b982d4c7208f99db001cc0276fac9c13`).
-Its face window is display-only: the runtime clips the existing image pixels
-to an oval and the selection card uses a CSS viewport. No generated facial
+Its face window is display-only: `portrait.js` clips the original pixels to
+the hair/jaw outline defined in `racers.js`, with a tighter crop. The same
+contour is used in the WebGL face and CSS portrait so no grey oval remains.
+The original face pixels are copied without resizing or recolouring before
+the ordinary display scaling. No generated facial
 pixels, retouching, replacement expression or synthesized side/back is used.
 All five camera-facing portraits remain children of the head in the shared
 rig hierarchy. The intentional 2.5D photo convention preserves identity
