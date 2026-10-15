@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ko">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#faf8ed"><title>PRINCESS KART · FLEX MATH</title><link rel="stylesheet" href="./kart.css"></head>
+<body>
+<header class="site-header"><a href="../index.html" aria-label="FLEX MATH 메인 게임으로">FLEX <b>MATH</b><span>↖ 메인으로</span></a><div class="header-right"><span class="edition">FRIENDS ARCADE / 04</span><button id="sound" class="small-button" aria-pressed="false">♫ 음악 켜기</button></div></header>
+<main>
+  <section class="intro"><div><p class="eyebrow">A VERY ROYAL, VERY SILLY RACE</p><h1>PRINCESS <span>KART<i>✦</i></span></h1><p class="intro-copy">드레스 입고, 왕관 쓰고, 일단 밟아. <strong>우리 지금 뭐 타고 있는 거야?</strong></p></div><div class="race-stamp"><b id="racerCount">5</b><span>FRIENDS<br>ONE CIRCUIT</span><i>↗</i></div></section>
+  <div class="game-layout">
+    <section class="arena" aria-label="공주 카트 경기장">
+      <div class="arena-top"><span class="circuit-name"><i></i> 왕관 정원 서킷</span><div class="race-info"><b id="lap">2 LAPS</b><span id="timer">00:00.0</span></div></div>
+      <div id="stage"><div id="loadStatus" role="status">친구들이 카트에 올라타는 중…</div><div class="scene-caption">CROWN GARDEN <span>✦</span> GRAND PRIX</div></div>
+      <div id="countdown" class="countdown" hidden aria-live="assertive"></div>
+      <div class="arena-bottom"><div class="live-note"><span id="liveDot"></span><span id="liveNote">친구를 고르고 함께 출발해 봐!</span></div><div class="view-controls"><button id="camera" class="small-button" aria-pressed="false">친구 가까이</button><button id="motion" class="small-button" aria-pressed="true">효과 켜짐</button></div></div>
+    </section>
+    <aside class="race-panel">
+      <div class="panel-heading"><span class="eyebrow">THE ROYAL GRID</span><span id="phaseLabel" class="status-pill">출발 준비</span></div>
+      <h2 id="boardTitle">오늘의 출전 명단</h2><ol id="standings" aria-label="실시간 레이스 순위"></ol>
+      <div id="result" hidden tabindex="-1"><span class="eyebrow">CHECKERED FLAG</span><h3 id="winnerTitle"></h3><p id="resultCopy"></p></div>
+      <div class="race-actions"><button id="start" class="primary" disabled>같이 출발! <span>↗</span></button><button id="boost" class="boost-button" disabled>✦ 응원 부스터 <span id="boostState">출발 후 사용</span></button><div class="secondary-actions"><button id="pause" class="small-button" disabled>일시 정지</button><button id="reset" class="small-button" disabled>다시 준비</button></div></div>
+      <p class="how-to">운전은 친구들에게 맡겨!<br>고른 친구에게 <kbd>SPACE</kbd> 또는 부스터 버튼으로 힘을 줘. 7초마다 다시 쓸 수 있어.</p>
+      <div class="race-stats"><span>추월 <b id="passes">0</b></span><span>귀여운 접촉 <b id="bumps">0</b></span></div>
+    </aside>
+  </div>
+  <section class="pick-section"><div class="pick-heading"><div><span class="eyebrow">PICK YOUR PRINCESS</span><h2>오늘은 누구 편?</h2></div><p>모두 함께 달려요. 응원할 친구 한 명만 골라 줘.</p></div><div id="racers" class="racers"></div></section>
+  <p class="footnote">서로 추월하고, 살짝 부딪히고, 같이 웃는 2바퀴. <span>우정은 지키고, 순위는 바꾸고.</span></p>
+  <p id="announcement" class="sr-only" role="status" aria-live="polite"></p>
+</main><script type="module" src="./controller.js"></script>
+</body></html>
