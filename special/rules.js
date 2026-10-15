@@ -28,27 +28,25 @@ export const rounds=Object.freeze([
   Object.freeze({target:'circle',options:Object.freeze(['torus','ellipse','segment'])}),
   Object.freeze({target:'segment',options:Object.freeze(['arc','circle','sphere'])})
 ]);
+// Choosing the held object is the answer. There is no true/false claim and
+// no "correct rejection" escape: a non-homeomorphic choice always loses.
 export class Match {
   constructor(){this.index=0;this.scores=[0,0];this.phase='select';this.result=null;}
   get round(){return rounds[this.index];}
-  submit(selections,claims){
-    if(this.phase!=='select')throw new Error('Round already resolved');
-    if(!Array.isArray(selections)||!Array.isArray(claims)||selections.length!==2||claims.length!==2)throw new Error('Two answers required');
-    if(selections.some(id=>!this.round.options.includes(id))||claims.some(c=>typeof c!=='boolean'))throw new Error('Invalid answer');
-    const correct=selections.map((id,i)=>homeomorphic(this.round.target,id)===claims[i]);
-    correct.forEach((right,i)=>{if(right)this.scores[i]++;});
-    // A correct rejection also wins: victory means correct judgement, not possession.
-    this.result=Object.freeze({correct:Object.freeze(correct),winners:Object.freeze(correct.flatMap((right,i)=>right?[i]:[]))});
-    this.phase='result';return this.result;
+  submit(selected){
+    if(this.phase!=='select')throw new Error('Round already started');
+    if(!this.round.options.includes(selected))throw new Error('Select an offered model');
+    const won=homeomorphic(this.round.target,selected);
+    this.result=Object.freeze({selected,target:this.round.target,won,winner:won?0:1});
+    this.phase='fighting';return this.result;
+  }
+  finish(){
+    if(this.phase!=='fighting')throw new Error('No fight to finish');
+    this.scores[this.result.winner]++;this.phase='result';return this.result;
   }
   next(){
-    if(this.phase!=='result')throw new Error('Answer before advancing');
+    if(this.phase!=='result')throw new Error('Finish the fight before advancing');
     if(this.index===rounds.length-1){this.phase='complete';return false;}
     this.index++;this.phase='select';this.result=null;return true;
-  }
-  get champions(){
-    if(this.phase!=='complete')return [];
-    const best=Math.max(...this.scores);
-    return best===0?[]:this.scores.flatMap((score,i)=>score===best?[i]:[]);
   }
 }

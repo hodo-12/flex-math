@@ -23,37 +23,56 @@ test('classification is reflexive, symmetric and transitive on the entire catalo
 test('every round supports both correct and incorrect choices',()=>{
   for(const r of rounds){assert.ok(r.options.some(id=>homeomorphic(r.target,id)));assert.ok(r.options.some(id=>!homeomorphic(r.target,id)));}
 });
-test('exhaustive pair of choices and claims: only correct judges win and score',()=>{
-  for(let round=0;round<rounds.length;round++)for(const a of rounds[round].options)for(const b of rounds[round].options)for(const ca of [true,false])for(const cb of [true,false]){
-    const m=new Match();m.index=round;
-    const expected=[homeomorphic(m.round.target,a)===ca,homeomorphic(m.round.target,b)===cb];
-    const result=m.submit([a,b],[ca,cb]);
-    assert.deepEqual(result.correct,expected);
-    assert.deepEqual(result.winners,expected.flatMap((ok,i)=>ok?[i]:[]));
-    assert.deepEqual(m.scores,expected.map(Number));
-    assert.throws(()=>m.submit([a,b],[ca,cb]));
-    assert.deepEqual(m.scores,expected.map(Number));
+test('every selectable object wins exactly when it is homeomorphic',()=>{
+  for(let index=0;index<rounds.length;index++)for(const id of rounds[index].options){
+    const m=new Match();m.index=index;
+    const result=m.submit(id),won=homeomorphic(m.round.target,id);
+    assert.equal(result.won,won);assert.equal(result.winner,won?0:1);
+    assert.equal(m.phase,'fighting');assert.deepEqual(m.scores,[0,0]);
+    assert.throws(()=>m.submit(id));assert.throws(()=>m.next());
+    m.finish();assert.deepEqual(m.scores,won?[1,0]:[0,1]);
+    assert.throws(()=>m.finish());assert.throws(()=>m.submit(id));
   }
 });
-test('correct rejection wins; incorrect possession never wins',()=>{
-  const m=new Match();assert.deepEqual(m.submit(['sphere','ovalTorus'],[false,false]).winners,[0]);assert.deepEqual(m.scores,[1,0]);
+test('a non-homeomorphic object always loses, with no correct-rejection option',()=>{
+  const m=new Match();assert.equal(m.submit('sphere',false).won,false);m.finish();assert.deepEqual(m.scores,[0,1]);
 });
-test('invalid or incomplete submissions leave state unchanged',()=>{
+test('invalid and incomplete choices leave state unchanged',()=>{
   const m=new Match();
-  for(const args of [[[],[]],[['torus','sphere'],[true,false]],[['sphere','sphere'],[null,true]],[null,null]]){
-    assert.throws(()=>m.submit(...args));assert.equal(m.phase,'select');assert.deepEqual(m.scores,[0,0]);
+  for(const id of [null,undefined,'missing','torus',[],true,'toString']){
+    assert.throws(()=>m.submit(id));assert.equal(m.phase,'select');assert.deepEqual(m.scores,[0,0]);
   }
-  assert.throws(()=>m.next());
+  assert.throws(()=>m.finish());assert.throws(()=>m.next());
 });
-test('all wrong yields no round winners and no champions; restart is isolated',()=>{
-  const m=new Match();
-  do{const r=m.round,ids=r.options.slice(0,2);assert.deepEqual(m.submit(ids,ids.map(id=>!homeomorphic(r.target,id))).winners,[]);}while(m.next());
-  assert.equal(m.phase,'complete');assert.deepEqual(m.champions,[]);assert.deepEqual(m.scores,[0,0]);assert.throws(()=>m.next());
-  assert.equal(new Match().index,0);assert.deepEqual(new Match().scores,[0,0]);
+test('four wins and four losses produce exact totals; new matches reset cleanly',()=>{
+  for(const win of [true,false]){
+    const m=new Match();do{m.submit(m.round.options.find(id=>homeomorphic(m.round.target,id)===win));m.finish();}while(m.next());
+    assert.equal(m.phase,'complete');assert.deepEqual(m.scores,win?[4,0]:[0,4]);assert.throws(()=>m.next());assert.throws(()=>m.submit('arc'));
+  }
+  const fresh=new Match();assert.equal(fresh.phase,'select');assert.equal(fresh.index,0);assert.deepEqual(fresh.scores,[0,0]);
 });
-test('both right yields shared wins and a shared championship',()=>{
-  const m=new Match();do{const r=m.round,ids=r.options.slice(0,2);assert.deepEqual(m.submit(ids,ids.map(id=>homeomorphic(r.target,id))).winners,[0,1]);}while(m.next());assert.deepEqual(m.champions,[0,1]);assert.deepEqual(m.scores,[4,4]);
+
+import {combatFrame,FIGHT_DURATION} from './combat.js';
+test('both fighters approach, throw distinct strikes and take damage',()=>{
+  assert.ok(Math.abs(combatFrame(1.55,true).poses[0].x)<Math.abs(combatFrame(0,true).poses[0].x));
+  for(const [t,attacker] of [[2.05,0],[2.95,1],[3.8,0],[4.5,1]]){
+    const frame=combatFrame(t,true);assert.equal(frame.poses[attacker].punch,1);
+    assert.equal(frame.impact.attacker,attacker);assert.ok(frame.health[1-attacker]<100);
+    assert.ok(combatFrame(t+.09,true).poses[1-attacker].recoil>.9);
+  }
 });
-test('a sole top scorer wins the championship',()=>{
-  const m=new Match();do{const r=m.round,ids=r.options.slice(0,2);m.submit(ids,[homeomorphic(r.target,ids[0]),!homeomorphic(r.target,ids[1])]);}while(m.next());assert.deepEqual(m.champions,[0]);assert.deepEqual(m.scores,[4,0]);
+test('winning and losing choices reverse the finisher, defeat pose and health',()=>{
+  for(const won of [true,false]){
+    const winner=won?0:1,loser=1-winner;
+    assert.equal(combatFrame(5.65,won).impact.attacker,winner);
+    const final=combatFrame(FIGHT_DURATION,won);
+    assert.equal(final.health[loser],0);assert.ok(final.health[winner]>0);
+    assert.equal(final.poses[loser].defeat,1);assert.equal(final.poses[winner].cheer,1);assert.equal(final.done,true);
+  }
+});
+test('fight timeline remains finite and bounded at all frames and after completion',()=>{
+  for(const won of [true,false])for(let t=0;t<=12;t+=1/60){
+    const f=combatFrame(t,won);for(const p of f.poses){assert.ok(Number.isFinite(p.x));assert.ok(Math.abs(p.x)<2.2);assert.ok(p.punch>=0&&p.punch<=1);}
+    assert.ok(f.health.every(h=>h>=0&&h<=100));assert.equal(f.done,t>=FIGHT_DURATION);
+  }
 });
