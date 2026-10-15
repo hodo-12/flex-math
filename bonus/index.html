@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#161328"><title>BONUS ROUND · FLEX MATH 비보잉 배틀</title><link rel="stylesheet" href="bonus.css"></head>
+<body>
+<header><a class="brand" href="../index.html"><b>FLEX<span> MATH</span></b><small>← 기존 게임으로 돌아가기</small></a><div class="header-right"><span class="live-dot"></span>BONUS ROUND<button id="sound" aria-pressed="false">♫ 비트 켜기</button><button id="motion" aria-pressed="true">효과 모션 켜짐</button></div></header>
+<main>
+<section class="intro"><div><p class="eyebrow">BONUS CYPHER / RED vs YELLOW</p><h1>같은 구조, <em>다른 무브.</em></h1></div><p>모형을 고르고 비보잉 한 판!<br><strong>위상동형이면 내 승리.</strong> 다른 구조면 상대의 승리.</p></section>
+<div class="game-layout">
+  <section class="arena" aria-label="빨간 공주와 노란 공주의 3D 비보잉 무대">
+    <div id="stage"></div>
+    <div class="arena-hud">
+      <div class="fighter you"><div class="fighter-name"><img src="../hood.png" alt=""><div><small>YOU · 내 캐릭터</small><b>빨강 공주</b></div></div><div class="flow" role="meter" aria-label="빨강 공주 플로우" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="flow0"></i></div><small class="flow-label">RED / FLOW</small></div>
+      <div class="round"><span id="roundLabel">ROUND 01</span><strong>VS</strong><small id="score">0승 · 0패</small><div id="beatBars" class="beat-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></div></div>
+      <div class="fighter rival"><div class="fighter-name"><img src="../avatar-cat-head.png" alt=""><div><small>RIVAL · 상대</small><b>노랑 공주</b></div></div><div class="flow" role="meter" aria-label="노랑 공주 플로우" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="flow1"></i></div><small class="flow-label">YELLOW / FLOW</small></div>
+    </div>
+    <div class="move-banner"><span id="turnLabel">WELCOME TO THE CYPHER</span><strong id="moveLabel">PICK YOUR SHAPE</strong></div>
+    <div class="stage-bottom"><span id="danceStatus">모형을 고르면 배틀을 시작할 수 있어요</span><button id="readResult" hidden>판정 보기 ↓</button></div>
+    <p id="loadStatus" role="status">비보잉 무대를 준비하고 있어요…</p>
+  </section>
+  <section class="console" aria-label="비보잉 모형 선택">
+    <div class="panel-heading"><span class="eyebrow">01 / 상대의 기준 모형</span><span id="roundCount">1 / 4</span></div>
+    <div class="reference"><div id="targetIcon" class="shape-icon"></div><div><small>이 모형과 위상동형을 찾아봐</small><h2 id="target"></h2><span id="targetType" class="type-label"></span></div></div>
+    <div class="choice-heading"><span class="eyebrow">02 / 내 캐릭터의 모형 선택</span><span>한 개 선택</span></div>
+    <div id="choices" class="choices" role="group" aria-label="내가 고를 모형"></div>
+    <p id="selectionNote" class="selection-note">늘리고 구부려서 같은 구조로 바꿀 수 있을까?</p>
+    <button id="dance" class="primary" disabled><span>모형을 먼저 골라 줘</span><b>↗</b></button>
+    <button id="next" class="primary" hidden>다음 비보잉 라운드 →</button>
+    <button id="restart" class="restart">처음부터 다시 ↻</button>
+  </section>
+</div>
+<div class="move-strip" aria-label="비보잉 동작 순서"><span><b>01</b> TOP ROCK <small>교차 스텝</small></span><span><b>02</b> FOOTWORK <small>바닥 풋워크</small></span><span><b>03</b> POWER & FREEZE <small>스핀과 프리즈</small></span></div>
+<section id="result" class="result" aria-live="polite" aria-atomic="true"><div id="resultMark" class="result-mark">♪</div><div><span id="resultKicker" class="eyebrow">SHAPE DECIDES THE WINNER</span><h2 id="resultTitle">춤은 다르게, 구조는 같게.</h2><p id="resultExplanation">빨강 공주와 노랑 공주가 번갈아 춤을 춰요. 내가 고른 모형이 위상동형이면 빨강 공주가 마지막 파워 무브로 승리해요.</p></div></section>
+<details><summary>배틀 규칙 · 무엇을 고르면 이길까?</summary><p>상대의 기준 모형과 위상동형인 물체를 고르면 내 캐릭터가 이겨요. 다른 구조를 고르면 상대가 이겨요. 모형은 춤이 시작되면 무대 양쪽 받침대로 옮겨져요. 반사 신경이나 클릭 속도는 승패에 영향을 주지 않아요. FLOW 게이지는 선택 결과를 보여 주는 연출이에요.</p><p>표면은 속을 채운 입체가 아닌 전체 경계면을 비교해요. 여기서 구와 알은 종수 0, 도넛 표면은 종수 1이에요. 곡선은 두께와 내부가 없는 선이며 원과 타원은 끝점이 없고, 선분과 휘어진 선분은 끝점이 두 개예요. 2차원 표면과 1차원 곡선은 위상동형이 아니에요.</p><p>비트는 버튼으로 켤 수 있어요. 효과 모션을 끄면 카메라 움직임과 반복 회전·점프가 줄어들어요.</p></details>
+</main><script type="module" src="controller.js"></script></body></html>

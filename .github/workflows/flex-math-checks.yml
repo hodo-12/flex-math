@@ -21,6 +21,7 @@ jobs:
         run: |
           npm test
           node --test character-rig.test.js
+          node --test bonus/bonus.test.js
       - name: Install browser test driver
         run: npm install --no-save --no-package-lock playwright-core@1.56.0
       - name: Install Korean fonts for readable browser screenshots
@@ -34,6 +35,8 @@ jobs:
             curl --fail --silent http://127.0.0.1:8080/ > /dev/null && break
             sleep 1
           done
+      - name: Test BONUS ROUND in Chrome
+        run: node bonus/browser-smoke.mjs
       - name: Test SPECIAL ROUND in Chrome
         run: node special/browser-smoke.mjs
       - name: Test game in Chrome
@@ -52,6 +55,7 @@ jobs:
             level3-guide.png
             character-previews/
             special-previews/
+            bonus-previews/
             avatar-hood-idle.png
             avatar-cat-walk.png
             avatar-cap-idle.png
